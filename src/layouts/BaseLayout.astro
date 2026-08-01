@@ -1,0 +1,159 @@
+---
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Owa | Web3 Storyteller & KOL", description = "Owa — Web3 Storyteller & KOL. Turning complex crypto into stories that grow communities across Africa and beyond." } = Astro.props;
+
+// Fetch Keystatic Site Settings
+const reader = createReader(process.cwd(), keystaticConfig);
+const siteSettings = await reader.singletons.siteSettings.read();
+
+const email = siteSettings?.email ?? 'owasaghedo2@gmail.com';
+const twitterUrl = siteSettings?.twitterUrl ?? 'https://x.com/KRAghedo';
+const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share/1DSUPtEhqk';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png">
+  <link rel="manifest" href="/favicon_io/site.webmanifest">
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <nav class="nav-pill" aria-label="Primary">
+    <a class="logo" href="/#top">Owa <img aria-hidden="true" src="/rose.png" alt=""></a>
+    <div class="nav-links">
+      <a href="/about">About</a>
+      <a href="/#services">Services</a>
+      <a href="/articles">Articles</a>
+      <a href="/#contact" class="pill-cta">Hire Me</a>
+    </div>
+    <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+      <svg class="icon-menu" width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon-close" width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </nav>
+</header>
+
+<div class="mobile-overlay" id="mobileOverlay">
+  <div class="mobile-panel" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+    <a href="/about">About <span aria-hidden="true">→</span></a>
+    <a href="/#services">Services <span aria-hidden="true">→</span></a>
+    <a href="/articles">Articles <span aria-hidden="true">→</span></a>
+    <a href="/#contact">Hire Me <span aria-hidden="true">→</span></a>
+  </div>
+</div>
+
+<slot />
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-col" style="max-width:260px;">
+        <div class="footer-logo">Owa</div>
+        <p>Join the community. Let's build, create, and grow together.</p>
+        <div class="footer-social">
+          <a href={twitterUrl} aria-label="X / Twitter" target="_blank" rel="noopener">𝕏</a>
+          <a href={facebookUrl} aria-label="Facebook" target="_blank" rel="noopener">f</a>
+          <a href={`mailto:${email}`} aria-label="Email">✉</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="/about">About</a>
+        <a href="/#services">Services</a>
+        <a href="/articles">Articles</a>
+        <a href="/#contact">Hire Me</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href={twitterUrl} target="_blank" rel="noopener">X / Twitter</a>
+        <a href={facebookUrl} target="_blank" rel="noopener">Facebook</a>
+        <a href={`mailto:${email}`}>Email</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="creator-credit">Built by <a href="https://emmystack01.com/">Emmy STACK01</a></span>
+      <span>Icon by <a href="https://www.flaticon.com/authors/chanut-is-industries" target="_blank" rel="noopener">Chanut-is-Industries</a> on Flaticon</span>
+      <span>© {new Date().getFullYear()} Owa. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var burger = document.getElementById('burgerBtn');
+  var overlay = document.getElementById('mobileOverlay');
+  var panel = document.getElementById('mobileMenu');
+  var body = document.body;
+
+  function openMenu(){
+    overlay?.classList.add('open');
+    burger?.classList.add('open');
+    burger?.setAttribute('aria-expanded', 'true');
+    body.classList.add('menu-open');
+  }
+  function closeMenu(){
+    overlay?.classList.remove('open');
+    burger?.classList.remove('open');
+    burger?.setAttribute('aria-expanded', 'false');
+    body.classList.remove('menu-open');
+  }
+
+  burger?.addEventListener('click', () => overlay?.classList.contains('open') ? closeMenu() : openMenu());
+  overlay?.addEventListener('click', (e) => { if (e.target === overlay) closeMenu(); });
+  panel?.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay?.classList.contains('open')) closeMenu(); });
+
+  var header = document.getElementById('siteHeader');
+  var lastScrollState = false;
+  window.addEventListener('scroll', () => {
+    var scrolled = window.scrollY > 30;
+    if (scrolled !== lastScrollState){
+      header?.classList.toggle('scrolled', scrolled);
+      lastScrollState = scrolled;
+    }
+  }, { passive: true });
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealEls = document.querySelectorAll('.reveal');
+  if (reduceMotion || !('IntersectionObserver' in window)){
+    revealEls.forEach((el) => el.classList.add('in-view'));
+  } else {
+    var observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach((el) => observer.observe(el));
+  }
+})();
+</script>
+</body>
+</html>

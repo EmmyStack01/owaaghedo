@@ -1,0 +1,215 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
+
+// Initialize Keystatic Reader
+const reader = createReader(process.cwd(), keystaticConfig);
+
+// Fetch all articles from Keystatic content store
+const rawArticles = await reader.collections.articles.all();
+
+// Transform & sort articles by published date (Newest first)
+const articles = rawArticles
+  .map((item) => ({
+    slug: item.slug,
+    ...item.entry,
+  }))
+  .sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
+
+// Unique list of categories for filter pills
+const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boolean))];
+---
+
+<BaseLayout 
+  title="Articles | Owa | Web3 Storyteller & KOL" 
+  description="Explore articles, insights, and stories on Web3 marketing, community building, and growth across Africa and beyond by Owa."
+>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="wrap">
+      <div class="back-link-nav">
+        <a href="/" class="back-link">← Back to Home</a>
+      </div>
+      <span class="eyebrow">Timeline Insights</span>
+      <h1>Fresh from the Timeline</h1>
+      <p>Thoughts, breakdowns, and strategies on Web3 marketing, community building, and scaling crypto projects worldwide.</p>
+    </div>
+  </section>
+
+  <!-- ARTICLES CONTROL HUB -->
+  <section class="articles-hub">
+    <div class="wrap hub-container">
+      <div class="hub-row-top">
+        <div class="search-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="articleSearch" placeholder="Search articles by topic, keyword..." aria-label="Search articles">
+        </div>
+
+        <div class="filter-dropdown">
+          <label for="dateFilter">Sort by:</label>
+          <select id="dateFilter" aria-label="Filter by date">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Pills Slider -->
+      <div class="category-pills" id="categorySlider" role="tablist" aria-label="Article categories">
+        {categories.map((cat, index) => (
+          <button 
+            class={`cat-btn ${index === 0 ? 'active' : ''}`} 
+            data-category={cat.toLowerCase().replace(/\s+/g, '-')}
+          >
+            {cat === 'all' ? 'All Posts' : cat}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICLES GRID SECTION -->
+  <section class="articles-section" id="articles">
+    <div class="wrap">
+      <div class="articles-grid" id="articlesGrid">
+        {articles.map((article, i) => {
+          const thumbClass = `t${(i % 6) + 1}`;
+          const formattedDate = new Date(article.publishedDate).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+          });
+          const catSlug = (article.category || 'general').toLowerCase().replace(/\s+/g, '-');
+          const tweetText = encodeURIComponent(`Just read this brilliant piece: "${article.title}" by @KRAghedo!`);
+
+          return (
+            <article 
+              class="article-card" 
+              data-category={catSlug} 
+              data-date={article.publishedDate}
+              data-title={article.title.toLowerCase()}
+              data-summary={article.summary.toLowerCase()}
+            >
+              <div class={`article-thumb ${thumbClass}`}>
+                {article.coverImage ? (
+                  <img src={article.coverImage} alt={article.title} style="width:100%; height:100%; object-fit:cover;" />
+                ) : (
+                  <span>Article Cover</span>
+                )}
+              </div>
+              <div class="article-body">
+                <div class="article-meta-row">
+                  <span class="article-cat">{article.category}</span>
+                  <span class="article-date">{formattedDate}</span>
+                </div>
+                <h3><a href={`/articles/${article.slug}`}>{article.title}</a></h3>
+                <p>{article.summary}</p>
+                <div class="article-footer-cta">
+                  <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="cta-share" target="_blank" rel="noopener">
+                    Share this on X and tag me →
+                  </a>
+                  <a href="/#contact" class="cta-hire">Want content like this for your project? Hire me →</a>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script>
+  // Filter & Search Logic
+  const searchInput = document.getElementById('articleSearch') as HTMLInputElement;
+  const dateSelect = document.getElementById('dateFilter') as HTMLSelectElement;
+  const categoryBtns = document.querySelectorAll('.cat-btn');
+  const articlesContainer = document.getElementById('articlesGrid');
+  const articleCards = Array.from(document.querySelectorAll('.article-card')) as HTMLElement[];
+
+  let activeCategory = 'all';
+
+  function filterAndSortArticles() {
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const sortOrder = dateSelect ? dateSelect.value : 'newest';
+
+    const visibleCards = articleCards.filter((card) => {
+      const matchesCat = activeCategory === 'all' || card.dataset.category === activeCategory;
+      const matchesSearch = !searchTerm || 
+        card.dataset.title?.includes(searchTerm) || 
+        card.dataset.summary?.includes(searchTerm);
+
+      return matchesCat && matchesSearch;
+    });
+
+    // Hide/Show matching cards
+    articleCards.forEach((card) => {
+      if (visibleCards.includes(card)) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Sort visible elements inside DOM
+    visibleCards.sort((a, b) => {
+      const dateA = new Date(a.dataset.date || 0).getTime();
+      const dateB = new Date(b.dataset.date || 0).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    visibleCards.forEach((card) => articlesContainer?.appendChild(card));
+  }
+
+  // Event Listeners
+  categoryBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      categoryBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = (btn as HTMLElement).dataset.category || 'all';
+      filterAndSortArticles();
+    });
+  });
+
+  searchInput?.addEventListener('input', filterAndSortArticles);
+  dateSelect?.addEventListener('change', filterAndSortArticles);
+
+  // Click & Drag Category Slider
+  const slider = document.getElementById('categorySlider');
+  let isDown = false;
+  let startX: number;
+  let scrollLeft: number;
+
+  if (slider) {
+    slider.addEventListener('mousedown', (e) => {
+      isDown = true;
+      slider.classList.add('active-grab');
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener('mouseleave', () => {
+      isDown = false;
+      slider.classList.remove('active-grab');
+    });
+
+    slider.addEventListener('mouseup', () => {
+      isDown = false;
+      slider.classList.remove('active-grab');
+    });
+
+    slider.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2;
+      slider.scrollLeft = scrollLeft - walk;
+    });
+  }
+</script>

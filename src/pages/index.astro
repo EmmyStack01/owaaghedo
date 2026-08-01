@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
+
+// Fetch Keystatic Site Settings
+const reader = createReader(process.cwd(), keystaticConfig);
+const siteSettings = await reader.singletons.siteSettings.read();
+
+const email = siteSettings?.email ?? 'owasaghedo2@gmail.com';
+const twitterUrl = siteSettings?.twitterUrl ?? 'https://x.com/KRAghedo';
+
+// Fetch 3 Recent Articles
+const allArticles = await getCollection('articles');
+const recentArticles = allArticles
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime())
+  .slice(0, 3);
+---
+
+<BaseLayout>
+  <div class="hero" id="top">
+    <div class="hero-glow glow-pink" aria-hidden="true"></div>
+    <div class="hero-glow glow-purple" aria-hidden="true"></div>
+    <div class="hero-glow glow-soft" aria-hidden="true"></div>
+    <div class="hero-vignette" aria-hidden="true"></div>
+
+    <div class="wrap hero-body">
+      <div class="hero-copy">
+        <span class="eyebrow">HELLO THERE</span>
+        <h1>Meet Owa</h1>
+        <p class="sub">Web3 Marketer, Growth strategist, community builder, Content writing, Web3 educator, KOL and KOL manager.</p>
+        <div class="cta-row">
+          <a href="#contact" class="btn btn-primary">Hire Me</a>
+          <a href="/articles" class="btn btn-light">Read Articles</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <div class="hero-image-slot">
+        <img src="/asset/owa-hero-image.png" alt="Portrait of Owa, Web3 storyteller and KOL">
+      </div>
+      <div class="hero-badge fade-in">
+        <span class="dot" aria-hidden="true"></span> Available for Projects
+      </div>
+    </div>
+  </div>
+
+  <div class="bio-card reveal" id="about">
+    <span class="eyebrow" style="color:var(--rose-deep);">Bio</span>
+    <h2>Hi, I'm Owa</h2>
+    <p>I wear multiple hats in Web3; as a Web3 Marketer, Growth strategist, Community Builder, KOL manager, Project Manager at Coinrency, and Content Writer. My passion is breaking down complex blockchain and crypto concepts into simple, relatable and compelling stories that educate, engage, inspire and drive adoption.</p>
+    <a href="/about" class="btn btn-primary">Learn More About Me</a>
+  </div>
+
+  <section class="services" id="services">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Services</span>
+        <h2>Ways we can work together</h2>
+      </div>
+      <div class="services-grid">
+        <div class="service-card reveal">
+          <div>
+            <span class="num">01</span>
+            <h3>Web3 Content Writing & Marketing</h3>
+          </div>
+          <a href="#contact" class="link">Work With Me</a>
+        </div>
+        <div class="service-card reveal">
+          <div>
+            <span class="num">02</span>
+            <h3>Community Building & Project Growth</h3>
+          </div>
+          <a href="#contact" class="link">Work With Me</a>
+        </div>
+        <div class="service-card reveal">
+          <div>
+            <span class="num">03</span>
+            <h3>KOL Partnerships & Management</h3>
+          </div>
+          <a href="#contact" class="link">Work With Me</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic Articles Section -->
+  <section class="articles" id="articles">
+    <div class="wrap">
+      <div class="articles-head-row reveal">
+        <div class="section-head">
+          <span class="eyebrow">Latest Articles</span>
+          <h2>Fresh from the timeline</h2>
+        </div>
+        <a href="/articles" class="btn btn-ghost">View All Articles</a>
+      </div>
+      <div class="articles-grid">
+        {recentArticles.map((article, index) => (
+          <article class="article-card reveal">
+            <div class={`article-thumb t${(index % 3) + 1}`}>
+              {article.data.coverImage ? (
+                <img src={article.data.coverImage} alt={article.data.title} />
+              ) : (
+                <span>Article image</span>
+              )}
+            </div>
+            <div class="article-body">
+              <span class="article-cat">{article.data.category}</span>
+              <h3>{article.data.title}</h3>
+              <p>{article.data.excerpt}</p>
+              <a href={`/articles/${article.id}`} class="article-read">Read full article →</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic Contact Links Section -->
+  <section id="contact" class="cta-strip">
+    <div class="wrap cta-strip-inner reveal">
+      <div class="cta-strip-copy">
+        <span class="eyebrow">Let's Work Together</span>
+        <h2>Ready to turn your project into a story people follow?</h2>
+        <p>Book a slot, DM on X, or drop an email — I reply fast.</p>
+      </div>
+      <div class="cta-strip-actions">
+        <a href={`mailto:${email}`} class="btn btn-primary">Email Me</a>
+        <a href={twitterUrl} class="btn btn-light" target="_blank" rel="noopener">Message me on X</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

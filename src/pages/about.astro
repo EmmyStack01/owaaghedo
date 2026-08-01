@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
+
+// Fetch dynamic global contact details from Keystatic Site Settings
+const reader = createReader(process.cwd(), keystaticConfig);
+const siteSettings = await reader.singletons.siteSettings.read();
+
+const email = siteSettings?.email ?? 'owasaghedo2@gmail.com';
+const twitterUrl = siteSettings?.twitterUrl ?? 'https://x.com/KRAghedo';
+---
+
+<BaseLayout 
+  title="About Owa | Web3 Storyteller & KOL" 
+  description="Learn more about Owa — Web3 Marketer, Growth Strategist, and Storyteller turning complex crypto into human connections."
+>
+
+  <!-- HERO SECTION -->
+  <section class="bio-hero" id="top">
+    <div class="hero-glow glow-pink" aria-hidden="true"></div>
+    <div class="hero-glow glow-purple" aria-hidden="true"></div>
+    <div class="hero-vignette" aria-hidden="true"></div>
+
+    <div class="wrap bio-hero-body">
+      <div class="bio-hero-copy">
+        <span class="eyebrow">ABOUT ME</span>
+        <h1>More than a Web3 marketer.</h1>
+        <p class="sub">I turn complex crypto ideas into stories people can easily understand.</p>
+        <div class="cta-row" style="margin-top:34px; display:flex; flex-wrap:wrap; gap:14px;">
+          <a href="#what-i-do" class="btn btn-primary">View Services</a>
+          <a href="#my-story" class="btn btn-light">Read My Story</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="bio-hero-media">
+      <div class="bio-hero-image-slot">
+        <img src="/asset/owa-hero-image.png" alt="Owa studio portrait">
+      </div>
+      <div class="hero-badge fade-in">
+        <span class="dot" aria-hidden="true"></span> Available for Projects
+      </div>
+    </div>
+  </section>
+
+  <!-- MEET OWA -->
+  <section class="meet-owa" id="meet-owa">
+    <div class="wrap">
+      <div class="meet-grid">
+        <div class="meet-image-wrap">
+          <img src="/asset/owa-bio-image2.png" alt="Owa office portrait">
+        </div>
+        <div class="meet-content">
+          <h2>Hi, I'm Owa.</h2>
+          <p>I'm a Web3 Marketer, Growth strategist, Community Builder, KOL manager, Project Manager at Coinrency, and Content writer who is obsessed with turning complex crypto ideas into stories people can easily understand.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MY STORY -->
+  <section class="my-story reveal" id="my-story">
+    <div class="wrap">
+      <div class="story-container">
+        <h2>I live at the intersection of storytelling and blockchain.</h2>
+        <p>Whether it's a long form article that positions a project, a thread that educates thousands, or daily content that builds real community, my goal is always the same: make Web3 clearer, more human and more accessible, especially for the next wave of African builders and users.</p>
+        <p>I don't just write about crypto.</p>
+        <span class="story-emphasis">"I live it!"</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEYOND WRITING -->
+  <section class="beyond-writing reveal" id="beyond-writing">
+    <div class="wrap">
+      <div class="beyond-grid">
+        <div class="beyond-image-wrap">
+          <img src="/asset/owa-hero-image.png" alt="Owa studio portrait visual break">
+        </div>
+        <div class="beyond-content">
+          <p>I hunt memecoins, study ecosystems, manage projects, and show up every day to grow with the people who grow with me.</p>
+          <p>My audience calls themselves <span class="billionaires-quote">"Billionaires"</span> for a reason.</p>
+          <p>We believe in the long game, in consistency, and in lifting each other higher.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT I DO -->
+  <section class="what-i-do reveal" id="what-i-do">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Expertise</span>
+        <h2>What I Do</h2>
+      </div>
+      <div class="services-grid-bio">
+        <div class="service-card-bio">
+          <div class="service-bullet-icon" aria-hidden="true"></div>
+          <span class="service-text">Craft high converting Web3 content</span>
+        </div>
+        <div class="service-card-bio">
+          <div class="service-bullet-icon" aria-hidden="true"></div>
+          <span class="service-text">Help projects tell their story in a way that builds trust and community</span>
+        </div>
+        <div class="service-card-bio">
+          <div class="service-bullet-icon" aria-hidden="true"></div>
+          <span class="service-text">Web3 Marketing</span>
+        </div>
+        <div class="service-card-bio">
+          <div class="service-bullet-icon" aria-hidden="true"></div>
+          <span class="service-text">Project growth strategist</span>
+        </div>
+        <div class="service-card-bio">
+          <div class="service-bullet-icon" aria-hidden="true"></div>
+          <span class="service-text">KOL and KOL manager</span>
+        </div>
+        <div class="service-card-bio">
+          <div class="service-bullet-icon" aria-hidden="true"></div>
+          <span class="service-text">Community Building</span>
+        </div>
+        <div class="service-card-bio" style="grid-column: 1 / -1;">
+          <div class="service-bullet-icon" aria-hidden="true"></div>
+          <span class="service-text">Current Project Manager at Coinrency</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MY PHILOSOPHY -->
+  <section class="philosophy reveal" id="philosophy">
+    <div class="wrap">
+      <div class="philosophy-content">
+        <blockquote>
+          "My goal is always the same:<br>
+          Make Web3 clearer, more human and more accessible."
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- READY TO WORK TOGETHER CTA -->
+  <section id="contact" class="cta-strip">
+    <div class="wrap cta-strip-inner reveal">
+      <div class="cta-strip-copy">
+        <span class="eyebrow">Let's Connect</span>
+        <h2>Ready to work together?</h2>
+        <p>Book a slot, DM on X, or drop an email — I reply fast.</p>
+      </div>
+      <div class="cta-strip-actions">
+        <a href={`mailto:${email}`} class="btn btn-primary">Email Me</a>  
+        <a href={twitterUrl} class="btn btn-light" target="_blank" rel="noopener">Message me on X</a>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
