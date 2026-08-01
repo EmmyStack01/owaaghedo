@@ -9,7 +9,7 @@ export default defineConfig({
   // IMPORTANT: Set your real production site URL here for valid canonical sitemaps
   site: 'https://owaaghedo.com',
   
-  output: 'hybrid', // Ensures dynamic API endpoints while statically prerendering site pages
+  output: 'server', // Ensures dynamic API endpoints while statically prerendering site pages
   adapter: cloudflare({
     imageService: 'cloudflare'
   }),
