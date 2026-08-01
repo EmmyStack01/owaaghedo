@@ -6,10 +6,8 @@ import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  // IMPORTANT: Set your real production site URL here for valid canonical sitemaps
   site: 'https://owaaghedo.com',
-  
-  output: 'server', // Ensures dynamic API endpoints while statically prerendering site pages
+  output: 'static', // Correct output setting for Astro v5+
   adapter: cloudflare({
     imageService: 'cloudflare'
   }),
@@ -20,10 +18,15 @@ export default defineConfig({
     sitemap({
       filter: (page) => 
         !page.includes('/keystatic') && 
-        !page.includes('/api/'), // Exclude Keystatic admin & API routes from sitemap index
+        !page.includes('/api/'),
       changefreq: 'weekly',
       priority: 0.7,
       lastmod: new Date(),
     }),
   ],
+  vite: {
+    ssr: {
+      external: ['node:authtoken', 'node:fs', 'node:path', 'node:crypto'],
+    },
+  },
 });
