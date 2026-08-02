@@ -5,7 +5,7 @@ import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://owaaghedo.com',
+  site: 'https://owaaghedo.morning-mountain-c623.workers.dev',
   output: 'static', // Correct output setting for Astro v5+
   adapter: cloudflare({
     imageService: 'cloudflare'
