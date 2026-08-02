@@ -1,11 +1,73 @@
 ---
-import { DocumentRenderer } from '@keystatic/core/renderer';
+const { node } = Astro.props;
 
-interface Props {
-  document: any;
+function renderNodeToHtml(item: any): string {
+  if (!item) return '';
+  if (typeof item === 'string') return escapeHtml(item);
+  if (Array.isArray(item)) return item.map(renderNodeToHtml).join('');
+
+  if (item.type === 'text') {
+    let text = escapeHtml(item.value || '');
+    if (item.marks) {
+      for (const mark of item.marks) {
+        if (mark.type === 'bold') text = `<strong>${text}</strong>`;
+        if (mark.type === 'italic') text = `<em>${text}</em>`;
+        if (mark.type === 'code') text = `<code>${text}</code>`;
+        if (mark.type === 'link') text = `<a href="${escapeHtml(mark.href)}">${text}</a>`;
+      }
+    }
+    return text;
+  }
+
+  const childrenHtml = item.children ? item.children.map(renderNodeToHtml).join('') : '';
+
+  switch (item.name || item.type) {
+    case 'doc':
+    case 'document':
+      return childrenHtml;
+    case 'paragraph':
+    case 'p':
+      return `<p>${childrenHtml}</p>`;
+    case 'heading':
+    case 'h1':
+    case 'h2':
+    case 'h3':
+    case 'h4':
+      const level = item.attributes?.level || item.level || 2;
+      return `<h${level}>${childrenHtml}</h${level}>`;
+    case 'list':
+    case 'ul':
+      return `<ul>${childrenHtml}</ul>`;
+    case 'ol':
+      return `<ol>${childrenHtml}</ol>`;
+    case 'item':
+    case 'li':
+      return `<li>${childrenHtml}</li>`;
+    case 'blockquote':
+      return `<blockquote>${childrenHtml}</blockquote>`;
+    case 'link':
+    case 'a':
+      return `<a href="${escapeHtml(item.attributes?.href || '#')}">${childrenHtml}</a>`;
+    case 'code':
+    case 'codeblock':
+      return `<pre><code>${childrenHtml || escapeHtml(item.attributes?.content || '')}</code></pre>`;
+    case 'hr':
+      return `<hr />`;
+    default:
+      return childrenHtml;
+  }
 }
 
-const { document } = Astro.props;
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+const htmlContent = renderNodeToHtml(node);
 ---
 
-{document && <DocumentRenderer document={document} />}
+<Fragment set:html={htmlContent} />
