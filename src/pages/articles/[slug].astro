@@ -3,10 +3,9 @@ export const prerender = true;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createReader } from '@keystatic/core/reader';
-import Markdoc from '@markdoc/markdoc';
+import Markdoc from '@astrojs/markdoc/html';
 import keystaticConfig from '../../../keystatic.config';
 
-// 1. Generate Static Paths for all articles
 export async function getStaticPaths() {
   const reader = createReader(process.cwd(), keystaticConfig);
   const articles = await reader.collections.articles.all();
@@ -19,20 +18,15 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 
-// 2. Fetch Markdoc AST from Keystatic and transform to HTML
+// Fetch Keystatic AST and transform to pure HTML string using Astro's Markdoc runtime
 const articleContent = await article.content();
 let htmlContent = '';
 
 if (articleContent && articleContent.node) {
-  const errors = Markdoc.validate(articleContent.node);
-  if (errors.length > 0) {
-    console.warn('Markdoc validation errors:', errors);
-  }
   const renderable = Markdoc.transform(articleContent.node);
-  htmlContent = Markdoc.renderers.html(renderable);
+  htmlContent = Markdoc.render(renderable);
 }
 
-// 3. Metadata and JSON-LD Schema configuration
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const coverImageUrl = article.coverImage ? new URL(article.coverImage, siteUrl).href : `${siteUrl}/asset/og-image.jpg`;
@@ -65,10 +59,8 @@ const articleSchema = {
   description={article.excerpt}
   image={coverImageUrl}
 >
-  <!-- Schema Injection -->
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} slot="head" />
 
-  <!-- ARTICLE HEADER -->
   <header class="article-header">
     <div class="article-header-inner">
       <a href="/articles" class="back-link">← Back to all articles</a>
@@ -81,7 +73,6 @@ const articleSchema = {
     </div>
   </header>
 
-  <!-- FEATURED IMAGE BANNER -->
   <div class="article-hero-media">
     {article.coverImage ? (
       <img src={article.coverImage} alt={article.title} class="article-hero-img" />
@@ -90,13 +81,11 @@ const articleSchema = {
     )}
   </div>
 
-  <!-- ARTICLE CONTENT BODY -->
   <main class="article-content-wrapper">
     <article class="article-content">
-      {/* Pure HTML Rendered from Markdoc AST */}
+      {/* Pure HTML rendering - zero React SSR issues */}
       <div class="markdoc-content" set:html={htmlContent} />
 
-      <!-- END OF ARTICLE CTAs -->
       <div class="article-ctas-box">
         <h4>Enjoyed this insight?</h4>
         <p>Help spread the word or let's collaborate on your next growth campaign.</p>
@@ -112,13 +101,11 @@ const articleSchema = {
           </a>
         </div>
       </div>
-
     </article>
   </main>
 </BaseLayout>
 
 <style>
-/* Page-Specific Article Extensions */
 .article-header {
   position: relative;
   padding: calc(var(--nav-h, 84px) + 50px) 0 40px;
@@ -182,7 +169,6 @@ const articleSchema = {
   margin: 0 auto;
 }
 
-/* Featured Media */
 .article-hero-media {
   max-width: 940px;
   margin: -40px auto 0;
@@ -207,7 +193,6 @@ const articleSchema = {
   border: 4px solid #fff;
 }
 
-/* Content Body & Typography */
 .article-content-wrapper { padding: 60px 0 80px; }
 .article-content {
   max-width: var(--article-max, 780px);
@@ -249,7 +234,6 @@ const articleSchema = {
   color: var(--wine-1, #3A0F2C);
 }
 
-/* CTAs Box */
 .article-ctas-box {
   max-width: var(--article-max, 780px);
   margin: 40px auto 0;
