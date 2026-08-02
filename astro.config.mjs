@@ -24,12 +24,22 @@ export default defineConfig({
   ],
   vite: {
     ssr: {
-      // Prevents bundling issues with Keystatic & React SSR
       external: ['node:authtoken', 'node:fs', 'node:path', 'node:crypto'],
     },
-    resolve: {
-      // Directs React to standard browser/worker implementations
-      conditions: ['workerd', 'worker', 'browser'],
+    build: {
+      rollupOptions: {
+        output: {
+          // Polyfill MessageChannel before any React server bundle executes
+          banner: `if (typeof globalThis.MessageChannel === 'undefined') {
+  globalThis.MessageChannel = class MessageChannel {
+    constructor() {
+      this.port1 = { onmessage: null, postMessage: () => {} };
+      this.port2 = { onmessage: null, postMessage: () => {} };
+    }
+  };
+}`,
+        },
+      },
     },
   },
 });
