@@ -1,2 +1,2 @@
 # owaaghedo
-Website of Web3 Writer: OWA
+Website of Web3 Writer: OWA.
