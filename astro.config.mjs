@@ -24,7 +24,12 @@ export default defineConfig({
   ],
   vite: {
     ssr: {
+      // Prevents bundling issues with Keystatic & React SSR
       external: ['node:authtoken', 'node:fs', 'node:path', 'node:crypto'],
+    },
+    resolve: {
+      // Directs React to standard browser/worker implementations
+      conditions: ['workerd', 'worker', 'browser'],
     },
   },
 });
