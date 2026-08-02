@@ -12,9 +12,9 @@ export default config({
       label: 'Site Settings',
       path: 'src/content/siteSettings/',
       schema: {
-        email: fields.string({ label: 'Email Address' }),
-        twitterUrl: fields.string({ label: 'X / Twitter URL' }),
-        facebookUrl: fields.string({ label: 'Facebook URL' }),
+        email: fields.text({ label: 'Email Address' }), // Fixed: fields.text
+        twitterUrl: fields.text({ label: 'X / Twitter URL' }), // Fixed: fields.text
+        facebookUrl: fields.text({ label: 'Facebook URL' }), // Fixed: fields.text
       },
     }),
   },
