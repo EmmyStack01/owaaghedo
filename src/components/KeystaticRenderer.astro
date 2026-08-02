@@ -1,0 +1,11 @@
+---
+import { DocumentRenderer } from '@keystatic/core/renderer';
+
+interface Props {
+  document: any;
+}
+
+const { document } = Astro.props;
+---
+
+{document && <DocumentRenderer document={document} />}
