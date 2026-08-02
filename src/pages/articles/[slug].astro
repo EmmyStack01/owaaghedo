@@ -3,9 +3,10 @@ export const prerender = true;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createReader } from '@keystatic/core/reader';
+import { DocumentRenderer } from '@keystatic/core/renderer';
 import keystaticConfig from '../../../keystatic.config';
 
-// 1. Generate Static Paths for all articles in Keystatic
+// 1. Generate Static Paths for all articles
 export async function getStaticPaths() {
   const reader = createReader(process.cwd(), keystaticConfig);
   const articles = await reader.collections.articles.all();
@@ -16,24 +17,21 @@ export async function getStaticPaths() {
   }));
 }
 
-const { slug } = Astro.params;
 const { article } = Astro.props;
 
-// 2. Fetch rich content from Keystatic for current article
-const reader = createReader(process.cwd(), keystaticConfig);
-const articleData = await reader.collections.articles.read(slug);
-const { node: ContentNode } = articleData ? await articleData.content() : { node: null };
+// 2. Fetch Document Content
+const contentDocument = await article.content();
 
 // 3. Metadata and JSON-LD Schema configuration
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const coverImageUrl = article.coverImage ? new URL(article.coverImage, siteUrl).href : `${siteUrl}/asset/og-image.jpg`;
 
-const formattedDate = new Date(article.publishedDate).toLocaleDateString('en-US', {
+const formattedDate = article.pubDate ? new Date(article.pubDate).toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
   year: 'numeric',
-});
+}) : '';
 
 const tweetText = encodeURIComponent(`Just read this brilliant piece: "${article.title}" by @KRAghedo! ${canonicalUrl}`);
 
@@ -41,8 +39,8 @@ const articleSchema = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": article.title,
-  "description": article.summary,
-  "datePublished": article.publishedDate,
+  "description": article.excerpt,
+  "datePublished": article.pubDate,
   "image": coverImageUrl,
   "author": {
     "@type": "Person",
@@ -54,7 +52,7 @@ const articleSchema = {
 
 <BaseLayout
   title={`${article.title} | Owa`}
-  description={article.summary}
+  description={article.excerpt}
   image={coverImageUrl}
 >
   <!-- Schema Injection -->
@@ -69,7 +67,7 @@ const articleSchema = {
         <span class="article-date-read">{formattedDate}</span>
       </div>
       <h1>{article.title}</h1>
-      <p class="article-subtitle">{article.summary}</p>
+      <p class="article-subtitle">{article.excerpt}</p>
     </div>
   </header>
 
@@ -85,8 +83,8 @@ const articleSchema = {
   <!-- ARTICLE CONTENT BODY -->
   <main class="article-content-wrapper">
     <article class="article-content">
-      {/* Dynamic Keystatic Document Renderer */}
-      {ContentNode && <ContentNode />}
+      {/* Keystatic Official Document Renderer */}
+      {contentDocument && <DocumentRenderer document={contentDocument} />}
 
       <!-- END OF ARTICLE CTAs -->
       <div class="article-ctas-box">
