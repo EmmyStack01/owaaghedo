@@ -5,10 +5,14 @@ import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://owaaghedo.morning-mountain-c623.workers.dev',
-  output: 'static', // Correct output setting for Astro v5+
+  // 1. Update site to match your actual Cloudflare Pages URL (or custom domain)
+  site: 'https://owaaghedo.pages.dev',
+  
+  // 2. Keystatic requires dynamic API routes, so Astro must run in server/hybrid mode
+  output: 'server', 
+
   adapter: cloudflare({
-    imageService: 'cloudflare'
+    imageService: 'passthrough', // Avoid potential Cloudflare Image Resizing binding errors if not enabled on account
   }),
   integrations: [
     react(),
