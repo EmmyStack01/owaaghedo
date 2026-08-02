@@ -5,7 +5,7 @@ export default config({
     kind: 'cloud',
   },
   cloud: {
-    project: 'REPLACE_KEYSTATIC_TEAM',
+    project: 'owasaghedo/owaaghedo',
   },
   singletons: {
     siteSettings: singleton({
@@ -13,8 +13,8 @@ export default config({
       path: 'src/content/siteSettings/',
       schema: {
         email: fields.string({ label: 'Email Address' }),
-        twitterUrl: fields.url({ label: 'X / Twitter URL' }),
-        facebookUrl: fields.url({ label: 'Facebook URL' }),
+        twitterUrl: fields.string({ label: 'X / Twitter URL' }),
+        facebookUrl: fields.string({ label: 'Facebook URL' }),
       },
     }),
   },
@@ -35,7 +35,7 @@ export default config({
           ],
           defaultValue: 'Education & Explainers',
         }),
-        excerpt: fields.text({ label: 'Excerpt', multiline: true }),
+        excerpt: fields.text({ label: 'Excerpt / Summary', multiline: true }),
         pubDate: fields.date({ label: 'Publication Date' }),
         coverImage: fields.image({
           label: 'Cover Image',
