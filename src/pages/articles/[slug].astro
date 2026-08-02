@@ -2,8 +2,8 @@
 export const prerender = true;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import KeystaticRenderer from '../../components/KeystaticRenderer.astro';
 import { createReader } from '@keystatic/core/reader';
+import Markdoc from '@markdoc/markdoc';
 import keystaticConfig from '../../../keystatic.config';
 
 // 1. Generate Static Paths for all articles
@@ -19,8 +19,18 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 
-// 2. Fetch Document Content
-const contentDocument = await article.content();
+// 2. Fetch Markdoc AST from Keystatic and transform to HTML
+const articleContent = await article.content();
+let htmlContent = '';
+
+if (articleContent && articleContent.node) {
+  const errors = Markdoc.validate(articleContent.node);
+  if (errors.length > 0) {
+    console.warn('Markdoc validation errors:', errors);
+  }
+  const renderable = Markdoc.transform(articleContent.node);
+  htmlContent = Markdoc.renderers.html(renderable);
+}
 
 // 3. Metadata and JSON-LD Schema configuration
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
@@ -83,8 +93,8 @@ const articleSchema = {
   <!-- ARTICLE CONTENT BODY -->
   <main class="article-content-wrapper">
     <article class="article-content">
-      {/* Isolated Astro Renderer */}
-      <KeystaticRenderer document={contentDocument} />
+      {/* Pure HTML Rendered from Markdoc AST */}
+      <div class="markdoc-content" set:html={htmlContent} />
 
       <!-- END OF ARTICLE CTAs -->
       <div class="article-ctas-box">
