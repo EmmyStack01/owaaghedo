@@ -2,8 +2,8 @@
 export const prerender = true;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import KeystaticRenderer from '../../components/KeystaticRenderer.astro';
 import { createReader } from '@keystatic/core/reader';
-import { DocumentRenderer } from '@keystatic/core/renderer';
 import keystaticConfig from '../../../keystatic.config';
 
 // 1. Generate Static Paths for all articles
@@ -83,8 +83,8 @@ const articleSchema = {
   <!-- ARTICLE CONTENT BODY -->
   <main class="article-content-wrapper">
     <article class="article-content">
-      {/* Keystatic Official Document Renderer */}
-      {contentDocument && <DocumentRenderer document={contentDocument} />}
+      {/* Isolated Astro Renderer */}
+      <KeystaticRenderer document={contentDocument} />
 
       <!-- END OF ARTICLE CTAs -->
       <div class="article-ctas-box">
