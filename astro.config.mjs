@@ -27,6 +27,8 @@ export default defineConfig({
       external: ['node:authtoken', 'node:fs', 'node:path', 'node:crypto'],
     },
     build: {
+      // Ensures CSS/JS bundle filenames don't get messed up during Worker compilation
+      cssCodeSplit: true,
       rollupOptions: {
         output: {
           banner: `if (typeof globalThis.MessageChannel === 'undefined') {
