@@ -21,6 +21,10 @@ export default defineConfig({
       changefreq: 'weekly',
       priority: 0.7,
       lastmod: new Date(),
+      serialize(item) {
+        item.url = item.url.replace(/\/$/, '');
+        return item;
+      }
     }),
   ],
   vite: {
