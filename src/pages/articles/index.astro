@@ -1,24 +1,18 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { createReader } from '@keystatic/core/reader';
-import keystaticConfig from '../../../keystatic.config';
+import { getCollection } from 'astro:content';
 
-// Initialize Keystatic Reader
-const reader = createReader(process.cwd(), keystaticConfig);
-
-// Fetch all articles from Keystatic content store
-const rawArticles = await reader.collections.articles.all();
+// Fetch all articles from Content Collections
+const rawArticles = await getCollection('articles');
 
 // Transform & sort articles by published date (Newest first)
-// Safely handle Keystatic schema property mappings (pubDate/publishedDate & excerpt/summary)
 const articles = rawArticles
-  .map(({ slug, entry }) => ({
-    slug,
-    title: entry.title || '',
-    summary: entry.excerpt || entry.summary || '',
-    coverImage: entry.coverImage || '',
-    category: entry.category || 'Web3',
-    publishedDate: entry.pubDate || entry.publishedDate || '',
+  .map((article) => ({
+    slug: article.slug,
+    title: article.data.title || '',
+    summary: article.data.excerpt || article.data.summary || '',
+    coverImage: article.data.coverImage || '',
+    category: article.data.category || 'Web3',
+    publishedDate: article.data.pubDate || article.data.publishedDate || '',
   }))
   .sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
 
@@ -26,10 +20,385 @@ const articles = rawArticles
 const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boolean))];
 ---
 
-<BaseLayout 
-  title="Articles | Owa | Web3 Storyteller & KOL" 
-  description="Explore articles, insights, and stories on Web3 marketing, community building, and growth across Africa and beyond by Owa."
->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles | Owa | Web3 Storyteller & KOL</title>
+  <meta name="description" content="Explore articles, insights, and stories on Web3 marketing, community building, and growth across Africa and beyond by Owa.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png">
+  <link rel="manifest" href="/favicon_io/site.webmanifest">
+
+  <!-- OpenGraph & Social Cards -->
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Owa Aghedo">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Articles | Owa | Web3 Storyteller & KOL">
+  <meta property="og:description" content="Explore articles, insights, and stories on Web3 marketing, community building, and growth.">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@KRAghedo">
+
+  <style>
+    /* =========================================================
+       DESIGN TOKENS & BASE STYLES
+       ========================================================= */
+    :root {
+      --rose: #E85D8A;
+      --rose-bright: #FF8FB3;
+      --rose-deep: #B8386A;
+      --wine-1: #3A0F2C;
+      --wine-2: #5C1B41;
+      --cream: #FBF3F0;
+      --cream-alt: #F6E9EC;
+      --ink: #2B1B2E;
+      --ink-soft: #5B4A5E;
+      --line: rgba(43,27,46,0.12);
+      --radius: 24px;
+      --max: 1220px;
+
+      --shadow-sm: 0 10px 24px -12px rgba(43,27,46,0.28);
+      --shadow-lg: 0 40px 80px -28px rgba(43,27,46,0.40);
+
+      --ease: cubic-bezier(.16,1,.3,1);
+    }
+
+    body::-webkit-scrollbar { width: 8px; }
+    body::-webkit-scrollbar-track { background: #fff; }
+    body::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 10px; }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    h1, h2, h3 {
+      font-family: 'Fraunces', serif;
+      margin: 0;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 40px; }
+    ::selection { background: var(--rose); color: #fff; }
+
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--rose-bright);
+      outline-offset: 3px;
+      border-radius: 8px;
+    }
+
+    /* =========================================================
+       PAGE HEADER / HERO SECTION
+       ========================================================= */
+    .page-header {
+      position: relative;
+      padding: 50px 0 60px;
+      background:
+        radial-gradient(50% 50% at 90% 10%, rgba(232,93,138,0.18), transparent 60%),
+        linear-gradient(150deg, var(--wine-1) 0%, var(--wine-2) 100%);
+      color: #fff;
+      text-align: center;
+    }
+
+    .back-link-nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--rose-bright);
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+      transition: all .3s var(--ease);
+    }
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .page-header h1 {
+      font-size: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+      font-weight: 700;
+      margin-top: 10px;
+      margin-bottom: 16px;
+    }
+    .page-header p {
+      color: rgba(255,241,246,0.8);
+      font-size: 1.15rem;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .page-header .eyebrow {
+      color: var(--rose-bright);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* =========================================================
+       ARTICLES CONTROL HUB & CATEGORY SLIDER
+       ========================================================= */
+    .articles-hub {
+      background: var(--cream-alt);
+      padding: 32px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .hub-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .hub-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Search Bar */
+    .search-bar {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+      max-width: 480px;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 14px 20px 14px 48px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.95rem;
+      color: var(--ink);
+      transition: border-color .3s ease, box-shadow .3s ease;
+    }
+    .search-bar input:focus {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 4px rgba(232,93,138,0.15);
+      outline: none;
+    }
+    .search-bar svg {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-soft);
+      pointer-events: none;
+    }
+
+    /* Date Filter */
+    .filter-dropdown {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .filter-dropdown label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+    .filter-dropdown select {
+      padding: 12px 20px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.95rem;
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    /* Category Pills Slider */
+    .category-pills {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 12px;
+      width: 100%;
+      overflow-x: auto !important;
+      overflow-y: hidden;
+      padding: 6px 2px 12px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      cursor: grab;
+      user-select: none;
+    }
+    .category-pills.active-grab {
+      cursor: grabbing;
+    }
+    .category-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-btn {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      cursor: pointer;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      transition: all .25s var(--ease);
+    }
+    .cat-btn:hover, .cat-btn.active {
+      background: var(--wine-1);
+      color: #fff;
+      border-color: var(--wine-1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* =========================================================
+       ARTICLES GRID SECTION
+       ========================================================= */
+    .articles-section {
+      padding: 64px 0 96px;
+    }
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .article-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow .4s var(--ease), transform .4s var(--ease), border-color .4s ease;
+    }
+    .article-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-6px);
+      border-color: transparent;
+    }
+    .article-thumb {
+      aspect-ratio: 16/11;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.85);
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 0.95rem;
+    }
+    .article-thumb span { transition: transform .5s var(--ease); }
+    .article-card:hover .article-thumb span { transform: scale(1.08); }
+
+    /* Gradient Background Variations */
+    .article-thumb.t1 { background: linear-gradient(150deg, #E9A0BC, #C25D82); }
+    .article-thumb.t2 { background: linear-gradient(150deg, #7A2450, #3A0F2C); }
+    .article-thumb.t3 { background: linear-gradient(150deg, #D4A24C, #B8386A); }
+    .article-thumb.t4 { background: linear-gradient(150deg, #5B2A7A, #3A0F2C); }
+    .article-thumb.t5 { background: linear-gradient(150deg, #FF8FB3, #7A2450); }
+    .article-thumb.t6 { background: linear-gradient(150deg, #B8386A, #5C1B41); }
+
+    .article-body {
+      padding: 26px 28px 30px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .article-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .article-cat {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--rose-deep);
+    }
+    .article-date {
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      opacity: 0.75;
+    }
+    .article-card h3 {
+      font-size: 1.2rem;
+      margin-top: 4px;
+      font-weight: 600;
+      font-family: 'Fraunces', serif;
+    }
+    .article-card p {
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+      margin-top: 10px;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .article-footer-cta {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .article-footer-cta a {
+      font-size: 0.84rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .25s ease;
+    }
+    .cta-share { color: var(--ink); }
+    .cta-share:hover { color: var(--rose-deep); }
+    .cta-hire { color: var(--rose-deep); }
+    .cta-hire:hover { color: var(--wine-1); text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .articles-grid { grid-template-columns: 1fr 1fr; }
+      .wrap { padding: 0 32px; }
+    }
+    @media (max-width: 720px) {
+      .wrap { padding: 0 20px; }
+      .articles-grid { grid-template-columns: 1fr; }
+      .hub-row-top { flex-direction: column; align-items: stretch; }
+      .filter-dropdown { justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
 
   <!-- PAGE HEADER -->
   <section class="page-header">
@@ -133,93 +502,93 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
     </div>
   </section>
 
-</BaseLayout>
+  <script>
+    // Filter & Search Logic
+    const searchInput = document.getElementById('articleSearch') as HTMLInputElement;
+    const dateSelect = document.getElementById('dateFilter') as HTMLSelectElement;
+    const categoryBtns = document.querySelectorAll('.cat-btn');
+    const articlesContainer = document.getElementById('articlesGrid');
+    const articleCards = Array.from(document.querySelectorAll('.article-card')) as HTMLElement[];
 
-<script>
-  // Filter & Search Logic
-  const searchInput = document.getElementById('articleSearch') as HTMLInputElement;
-  const dateSelect = document.getElementById('dateFilter') as HTMLSelectElement;
-  const categoryBtns = document.querySelectorAll('.cat-btn');
-  const articlesContainer = document.getElementById('articlesGrid');
-  const articleCards = Array.from(document.querySelectorAll('.article-card')) as HTMLElement[];
+    let activeCategory = 'all';
 
-  let activeCategory = 'all';
+    function filterAndSortArticles() {
+      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const sortOrder = dateSelect ? dateSelect.value : 'newest';
 
-  function filterAndSortArticles() {
-    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    const sortOrder = dateSelect ? dateSelect.value : 'newest';
+      const visibleCards = articleCards.filter((card) => {
+        const matchesCat = activeCategory === 'all' || card.dataset.category === activeCategory;
+        const matchesSearch = !searchTerm || 
+          card.dataset.title?.includes(searchTerm) || 
+          card.dataset.summary?.includes(searchTerm);
 
-    const visibleCards = articleCards.filter((card) => {
-      const matchesCat = activeCategory === 'all' || card.dataset.category === activeCategory;
-      const matchesSearch = !searchTerm || 
-        card.dataset.title?.includes(searchTerm) || 
-        card.dataset.summary?.includes(searchTerm);
+        return matchesCat && matchesSearch;
+      });
 
-      return matchesCat && matchesSearch;
+      // Hide/Show matching cards
+      articleCards.forEach((card) => {
+        if (visibleCards.includes(card)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Sort visible elements inside DOM
+      visibleCards.sort((a, b) => {
+        const dateA = new Date(a.dataset.date || 0).getTime();
+        const dateB = new Date(b.dataset.date || 0).getTime();
+        return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      });
+
+      visibleCards.forEach((card) => articlesContainer?.appendChild(card));
+    }
+
+    // Event Listeners
+    categoryBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        categoryBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategory = (btn as HTMLElement).dataset.category || 'all';
+        filterAndSortArticles();
+      });
     });
 
-    // Hide/Show matching cards
-    articleCards.forEach((card) => {
-      if (visibleCards.includes(card)) {
-        card.style.display = 'flex';
-      } else {
-        card.style.display = 'none';
-      }
-    });
+    searchInput?.addEventListener('input', filterAndSortArticles);
+    dateSelect?.addEventListener('change', filterAndSortArticles);
 
-    // Sort visible elements inside DOM
-    visibleCards.sort((a, b) => {
-      const dateA = new Date(a.dataset.date || 0).getTime();
-      const dateB = new Date(b.dataset.date || 0).getTime();
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
-    });
+    // Click & Drag Category Slider
+    const slider = document.getElementById('categorySlider');
+    let isDown = false;
+    let startX: number;
+    let scrollLeft: number;
 
-    visibleCards.forEach((card) => articlesContainer?.appendChild(card));
-  }
+    if (slider) {
+      slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        slider.classList.add('active-grab');
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+      });
 
-  // Event Listeners
-  categoryBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      categoryBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeCategory = (btn as HTMLElement).dataset.category || 'all';
-      filterAndSortArticles();
-    });
-  });
+      slider.addEventListener('mouseleave', () => {
+        isDown = false;
+        slider.classList.remove('active-grab');
+      });
 
-  searchInput?.addEventListener('input', filterAndSortArticles);
-  dateSelect?.addEventListener('change', filterAndSortArticles);
+      slider.addEventListener('mouseup', () => {
+        isDown = false;
+        slider.classList.remove('active-grab');
+      });
 
-  // Click & Drag Category Slider
-  const slider = document.getElementById('categorySlider');
-  let isDown = false;
-  let startX: number;
-  let scrollLeft: number;
-
-  if (slider) {
-    slider.addEventListener('mousedown', (e) => {
-      isDown = true;
-      slider.classList.add('active-grab');
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-    });
-
-    slider.addEventListener('mouseleave', () => {
-      isDown = false;
-      slider.classList.remove('active-grab');
-    });
-
-    slider.addEventListener('mouseup', () => {
-      isDown = false;
-      slider.classList.remove('active-grab');
-    });
-
-    slider.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      const walk = (x - startX) * 2;
-      slider.scrollLeft = scrollLeft - walk;
-    });
-  }
-</script>
+      slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2;
+        slider.scrollLeft = scrollLeft - walk;
+      });
+    }
+  </script>
+</body>
+</html>
