@@ -7,9 +7,11 @@ const reader = createReader(process.cwd(), keystaticConfig);
 
 // Fetch Site Settings
 const siteSettings = await reader.singletons.siteSettings.read();
-const email = siteSettings?.email ?? 'owasaghedo2@gmail.com';
-const twitterUrl = siteSettings?.twitterUrl ?? 'https://x.com/KRAghedo';
-const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share/1DSUPtEhqk';
+
+// Ensure empty string inputs from CMS don't bypass fallbacks
+const email = siteSettings?.email?.trim() || 'owasaghedo2@gmail.com';
+const twitterUrl = siteSettings?.twitterUrl?.trim() || 'https://x.com/KRAghedo';
+const facebookUrl = siteSettings?.facebookUrl?.trim() || 'https://www.facebook.com/share/1DSUPtEhqk';
 
 // Meta defaults
 const title = "Owa | Web3 Storyteller & KOL";
@@ -23,10 +25,10 @@ const recentArticles = rawArticles
   .map(({ slug, entry }) => ({
     slug,
     title: entry.title || '',
-    excerpt: entry.excerpt || entry.summary || '',
+    excerpt: entry.excerpt || '',
     coverImage: entry.coverImage || '',
     category: entry.category || 'Web3',
-    pubDate: entry.pubDate || entry.publishedDate || '',
+    pubDate: entry.pubDate || '',
   }))
   .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
   .slice(0, 3);
