@@ -2,6 +2,9 @@
 import { createReader } from '@keystatic/core/reader';
 import keystaticConfig from '../../keystatic.config';
 
+// 🚨 Step A: Import CSS in frontmatter so Vite bundles it automatically
+import '../styles/global.css';
+
 interface Props {
   title?: string;
   description?: string;
@@ -41,9 +44,9 @@ const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share
   <nav class="nav-pill" aria-label="Primary">
     <a class="logo" href="/#top">Owa <img aria-hidden="true" src="/rose.png" alt=""></a>
     <div class="nav-links">
-      <a href="/about">About</a>
+      <a href="/#about">About</a>
       <a href="/#services">Services</a>
-      <a href="/articles">Articles</a>
+      <a href="/#articles">Articles</a>
       <a href="/#contact" class="pill-cta">Hire Me</a>
     </div>
     <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
@@ -59,9 +62,9 @@ const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share
 
 <div class="mobile-overlay" id="mobileOverlay">
   <div class="mobile-panel" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Mobile navigation">
-    <a href="/about">About <span aria-hidden="true">→</span></a>
+    <a href="/#about">About <span aria-hidden="true">→</span></a>
     <a href="/#services">Services <span aria-hidden="true">→</span></a>
-    <a href="/articles">Articles <span aria-hidden="true">→</span></a>
+    <a href="/#articles">Articles <span aria-hidden="true">→</span></a>
     <a href="/#contact">Hire Me <span aria-hidden="true">→</span></a>
   </div>
 </div>
@@ -82,9 +85,9 @@ const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share
       </div>
       <div class="footer-col">
         <h4>Quick Links</h4>
-        <a href="/about">About</a>
+        <a href="/#about">About</a>
         <a href="/#services">Services</a>
-        <a href="/articles">Articles</a>
+        <a href="/#articles">Articles</a>
         <a href="/#contact">Hire Me</a>
       </div>
       <div class="footer-col">
@@ -97,14 +100,17 @@ const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share
     <div class="footer-bottom">
       <span class="creator-credit">Built by <a href="https://emmystack01.com/">Emmy STACK01</a></span>
       <span>Icon by <a href="https://www.flaticon.com/authors/chanut-is-industries" target="_blank" rel="noopener">Chanut-is-Industries</a> on Flaticon</span>
-      <span>© {new Date().getFullYear()} Owa. All rights reserved.</span>
+      <span>© <span id="year">{new Date().getFullYear()}</span> Owa. All rights reserved.</span>
     </div>
   </div>
 </footer>
 
-<script>
+<!-- 🚨 Step B: Use is:inline so browser executes interactions without Vite scope issues -->
+<script is:inline>
 (function(){
   "use strict";
+
+  /* Mobile menu */
   var burger = document.getElementById('burgerBtn');
   var overlay = document.getElementById('mobileOverlay');
   var panel = document.getElementById('mobileMenu');
@@ -122,37 +128,65 @@ const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share
     burger?.setAttribute('aria-expanded', 'false');
     body.classList.remove('menu-open');
   }
+  function toggleMenu(){
+    overlay?.classList.contains('open') ? closeMenu() : openMenu();
+  }
 
-  burger?.addEventListener('click', () => overlay?.classList.contains('open') ? closeMenu() : openMenu());
-  overlay?.addEventListener('click', (e) => { if (e.target === overlay) closeMenu(); });
-  panel?.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMenu));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay?.classList.contains('open')) closeMenu(); });
+  burger?.addEventListener('click', toggleMenu);
+  overlay?.addEventListener('click', function(e){ if (e.target === overlay) closeMenu(); });
+  panel?.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay?.classList.contains('open')) closeMenu(); });
 
+  /* Navbar scroll state */
   var header = document.getElementById('siteHeader');
   var lastScrollState = false;
-  window.addEventListener('scroll', () => {
+  function updateHeader(){
     var scrolled = window.scrollY > 30;
     if (scrolled !== lastScrollState){
       header?.classList.toggle('scrolled', scrolled);
       lastScrollState = scrolled;
     }
-  }, { passive: true });
+  }
+  window.addEventListener('scroll', updateHeader, { passive: true });
+  updateHeader();
 
+  /* Scroll reveal */
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var revealEls = document.querySelectorAll('.reveal');
   if (reduceMotion || !('IntersectionObserver' in window)){
-    revealEls.forEach((el) => el.classList.add('in-view'));
+    revealEls.forEach(function(el){ el.classList.add('in-view'); });
   } else {
-    var observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
         if (entry.isIntersecting){
           entry.target.classList.add('in-view');
           observer.unobserve(entry.target);
         }
       });
     }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-    revealEls.forEach((el) => observer.observe(el));
+    revealEls.forEach(function(el){ observer.observe(el); });
   }
+
+  /* Active nav link on scroll */
+  var sections = ['about', 'services', 'articles', 'contact']
+    .map(function(id){ return document.getElementById(id); })
+    .filter(Boolean);
+  var navLinks = document.querySelectorAll('.nav-links a[href*="#"]');
+
+  function updateActiveLink(){
+    var pos = window.scrollY + window.innerHeight * 0.35;
+    var current = null;
+    sections.forEach(function(sec){
+      if (sec.offsetTop <= pos) current = sec.id;
+    });
+    navLinks.forEach(function(link){
+      var href = link.getAttribute('href');
+      var match = href && href.endsWith('#' + current);
+      link.classList.toggle('active', !!match);
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink, { passive: true });
+  updateActiveLink();
 })();
 </script>
 </body>
