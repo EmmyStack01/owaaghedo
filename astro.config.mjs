@@ -29,7 +29,6 @@ export default defineConfig({
     build: {
       rollupOptions: {
         output: {
-          // Polyfill MessageChannel before any React server bundle executes
           banner: `if (typeof globalThis.MessageChannel === 'undefined') {
   globalThis.MessageChannel = class MessageChannel {
     constructor() {
