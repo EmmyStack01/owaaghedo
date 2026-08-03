@@ -29,6 +29,7 @@ const recentArticles = rawArticles
 ---
 
 <BaseLayout>
+  <!-- HERO SECTION -->
   <div class="hero" id="top">
     <div class="hero-glow glow-pink" aria-hidden="true"></div>
     <div class="hero-glow glow-purple" aria-hidden="true"></div>
@@ -55,8 +56,14 @@ const recentArticles = rawArticles
         <span class="dot" aria-hidden="true"></span> Available for Projects
       </div>
     </div>
+
+    <button class="scroll-indicator" onclick="document.getElementById('about')?.scrollIntoView({behavior:'smooth'})" aria-label="Scroll to content">
+      <span>Scroll</span>
+      <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
   </div>
 
+  <!-- BIO CARD -->
   <div class="bio-card reveal" id="about">
     <span class="eyebrow" style="color:var(--rose-deep);">Bio</span>
     <h2>Hi, I'm Owa</h2>
@@ -64,6 +71,7 @@ const recentArticles = rawArticles
     <a href="/about" class="btn btn-primary">Learn More About Me</a>
   </div>
 
+  <!-- SERVICES SECTION -->
   <section class="services" id="services">
     <div class="wrap">
       <div class="section-head reveal">
@@ -76,27 +84,33 @@ const recentArticles = rawArticles
             <span class="num">01</span>
             <h3>Web3 Content Writing & Marketing</h3>
           </div>
-          <a href="#contact" class="link">Work With Me</a>
+          <a href="#contact" class="link">Work With Me
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </div>
         <div class="service-card reveal">
           <div>
             <span class="num">02</span>
             <h3>Community Building & Project Growth</h3>
           </div>
-          <a href="#contact" class="link">Work With Me</a>
+          <a href="#contact" class="link">Work With Me
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </div>
         <div class="service-card reveal">
           <div>
             <span class="num">03</span>
             <h3>KOL Partnerships & Management</h3>
           </div>
-          <a href="#contact" class="link">Work With Me</a>
+          <a href="#contact" class="link">Work With Me
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Dynamic Articles Section -->
+  <!-- DYNAMIC ARTICLES SECTION -->
   <section class="articles" id="articles">
     <div class="wrap">
       <div class="articles-head-row reveal">
@@ -107,28 +121,32 @@ const recentArticles = rawArticles
         <a href="/articles" class="btn btn-ghost">View All Articles</a>
       </div>
       <div class="articles-grid">
-        {recentArticles.map((article, index) => (
-          <article class="article-card reveal">
-            <div class={`article-thumb t${(index % 3) + 1}`}>
-              {article.coverImage ? (
-                <img src={article.coverImage} alt={article.title} />
-              ) : (
-                <span>Article image</span>
-              )}
-            </div>
-            <div class="article-body">
-              <span class="article-cat">{article.category}</span>
-              <h3>{article.title}</h3>
-              <p>{article.excerpt}</p>
-              <a href={`/articles/${article.slug}`} class="article-read">Read full article →</a>
-            </div>
-          </article>
-        ))}
+        {recentArticles.length > 0 ? (
+          recentArticles.map((article, index) => (
+            <article class="article-card reveal">
+              <div class={`article-thumb t${(index % 3) + 1}`}>
+                {article.coverImage ? (
+                  <img src={article.coverImage} alt={article.title} />
+                ) : (
+                  <span>Article image</span>
+                )}
+              </div>
+              <div class="article-body">
+                <span class="article-cat">{article.category}</span>
+                <h3>{article.title}</h3>
+                <p>{article.excerpt}</p>
+                <a href={`/articles/${article.slug}`} class="article-read">Read full article →</a>
+              </div>
+            </article>
+          ))
+        ) : (
+          <p style="color:var(--ink-soft);">No articles found in Keystatic CMS yet.</p>
+        )}
       </div>
     </div>
   </section>
 
-  <!-- Dynamic Contact Links Section -->
+  <!-- CTA CONTACT STRIP -->
   <section id="contact" class="cta-strip">
     <div class="wrap cta-strip-inner reveal">
       <div class="cta-strip-copy">
