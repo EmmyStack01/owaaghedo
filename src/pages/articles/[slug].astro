@@ -1,11 +1,10 @@
 ---
 export const prerender = true;
 
-import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createReader } from '@keystatic/core/reader';
 import keystaticConfig from '../../../keystatic.config';
 
-// 1. Generate Static Paths
+// 1. Generate Static Paths from Keystatic Collection
 export async function getStaticPaths() {
   const reader = createReader(process.cwd(), keystaticConfig);
   const articles = await reader.collections.articles.all();
@@ -18,7 +17,7 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 
-// 2. Fetch AST and Render directly
+// 2. Fetch AST and Render HTML directly
 const articleContent = await article.content();
 
 function renderNodeToHtml(node: any): string {
@@ -91,7 +90,7 @@ const htmlContent = articleContent && articleContent.node
   ? renderNodeToHtml(articleContent.node) 
   : '';
 
-// 3. Metadata and JSON-LD Schema
+// 3. Metadata, URLs, and JSON-LD Schema Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const coverImageUrl = article.coverImage ? new URL(article.coverImage, siteUrl).href : `${siteUrl}/asset/og-image.jpg`;
@@ -119,13 +118,348 @@ const articleSchema = {
 };
 ---
 
-<BaseLayout
-  title={`${article.title} | Owa`}
-  description={article.excerpt}
-  image={coverImageUrl}
->
-  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} slot="head" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
 
+  <title>{article.title} | Owa</title>
+  <meta name="description" content={article.excerpt}>
+  <link rel="canonical" href={canonicalUrl}>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content={article.title}>
+  <meta property="og:description" content={article.excerpt}>
+  <meta property="og:url" content={canonicalUrl}>
+  <meta property="og:image" content={coverImageUrl}>
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@KRAghedo">
+  <meta name="twitter:title" content={article.title}>
+  <meta name="twitter:description" content={article.excerpt}>
+  <meta name="twitter:image" content={coverImageUrl}>
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png">
+  <link rel="manifest" href="/favicon_io/site.webmanifest">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Structured Data JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <style>
+    /* =========================================================
+       DESIGN TOKENS
+       ========================================================= */
+    :root {
+      --rose: #E85D8A;
+      --rose-bright: #FF8FB3;
+      --rose-deep: #B8386A;
+      --wine-1: #3A0F2C;
+      --wine-2: #5C1B41;
+      --wine-3: #7A2450;
+      --cream: #FBF3F0;
+      --cream-alt: #F6E9EC;
+      --ink: #2B1B2E;
+      --ink-soft: #5B4A5E;
+      --line: rgba(43,27,46,0.12);
+      --radius-sm: 16px;
+      --radius: 24px;
+      --radius-lg: 32px;
+      --max: 1220px;
+      --article-max: 780px;
+
+      --shadow-sm: 0 10px 24px -12px rgba(43,27,46,0.28);
+      --shadow-md: 0 24px 48px -20px rgba(43,27,46,0.30);
+      --shadow-lg: 0 40px 80px -28px rgba(43,27,46,0.40);
+      --shadow-rose: 0 14px 30px -10px rgba(184,56,106,0.55);
+
+      --ease: cubic-bezier(.16,1,.3,1);
+      --nav-h: 84px;
+    }
+
+    body::-webkit-scrollbar { width: 8px; }
+    body::-webkit-scrollbar-track { background: #fff; }
+    body::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 10px; }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Fraunces', serif;
+      margin: 0;
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 40px; }
+    ::selection { background: var(--rose); color: #fff; }
+
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--rose-bright);
+      outline-offset: 3px;
+      border-radius: 8px;
+    }
+
+    /* =========================================================
+       BUTTONS
+       ========================================================= */
+    .btn {
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: 999px;
+      font-weight: 600; 
+      font-size: 0.95rem;
+      cursor: pointer; 
+      border: 1.5px solid transparent;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s var(--ease), border-color .3s var(--ease), color .3s var(--ease);
+      text-align: center;
+      max-width: 100%;
+    }
+    .btn-primary {
+      background: linear-gradient(120deg, var(--rose), var(--rose-deep));
+      color: #fff;
+      box-shadow: var(--shadow-rose);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px -12px rgba(184,56,106,0.65);
+    }
+
+    /* =========================================================
+       ARTICLE HERO / HEADER
+       ========================================================= */
+    .article-header {
+      position: relative;
+      padding: calc(var(--nav-h) + 50px) 0 40px;
+      background:
+        radial-gradient(50% 60% at 80% 20%, rgba(232,93,138,0.15), transparent 70%),
+        linear-gradient(150deg, var(--wine-1) 0%, var(--wine-2) 100%);
+      color: #fff;
+      text-align: center;
+    }
+    .article-header-inner {
+      max-width: var(--article-max);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--rose-bright);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+      transition: transform .2s ease;
+    }
+    .back-link:hover { transform: translateX(-4px); }
+
+    .article-meta-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .article-tag {
+      background: rgba(232,93,138,0.25);
+      border: 1px solid rgba(255,143,179,0.3);
+      color: var(--rose-bright);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+    .article-date-read {
+      font-size: 0.88rem;
+      color: rgba(255,241,246,0.75);
+    }
+
+    .article-header h1 {
+      font-size: clamp(2.2rem, 1.4rem + 2.5vw, 3.6rem);
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .article-subtitle {
+      font-size: 1.15rem;
+      color: rgba(255,241,246,0.85);
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* =========================================================
+       FEATURED IMAGE BANNER
+       ========================================================= */
+    .article-hero-media {
+      max-width: 940px;
+      margin: -40px auto 0;
+      padding: 0 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .article-hero-img {
+      aspect-ratio: 16/9;
+      width: 100%;
+      object-fit: cover;
+      background: linear-gradient(150deg, #E9A0BC, #7A2450);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      color: #fff;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      border: 4px solid #fff;
+    }
+
+    /* =========================================================
+       ARTICLE CONTENT BODY
+       ========================================================= */
+    .article-content-wrapper { padding: 60px 0 80px; }
+    .article-content {
+      max-width: var(--article-max);
+      margin: 0 auto;
+      padding: 0 24px;
+      font-size: 1.1rem;
+      line-height: 1.78;
+      color: var(--ink-soft);
+    }
+
+    .article-content :global(> * + *) { margin-top: 1.6em; }
+    .article-content :global(h2) {
+      font-size: 1.9rem;
+      color: var(--ink);
+      margin-top: 2.2em;
+      margin-bottom: 0.6em;
+    }
+    .article-content :global(h3) {
+      font-size: 1.4rem;
+      color: var(--ink);
+      margin-top: 1.8em;
+      margin-bottom: 0.5em;
+    }
+    .article-content :global(p) { margin: 0; }
+    .article-content :global(strong) { color: var(--ink); }
+    .article-content :global(ul), .article-content :global(ol) {
+      padding-left: 24px;
+      margin: 1.2em 0;
+    }
+    .article-content :global(li) { margin-bottom: 0.5em; }
+    .article-content :global(blockquote) {
+      margin: 2em 0;
+      padding: 24px 32px;
+      background: var(--cream-alt);
+      border-left: 4px solid var(--rose);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--wine-1);
+    }
+
+    /* =========================================================
+       REQUIRED END-OF-ARTICLE CTAs
+       ========================================================= */
+    .article-ctas-box {
+      max-width: var(--article-max);
+      margin: 40px auto 0;
+      padding: 40px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      text-align: center;
+    }
+    .article-ctas-box h4 {
+      font-size: 1.5rem;
+      color: var(--ink);
+    }
+    .article-ctas-box p {
+      font-size: 0.98rem;
+      color: var(--ink-soft);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .cta-actions-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+      width: 100%;
+    }
+    .btn-x-share {
+      background: #000;
+      color: #fff;
+      border-color: #000;
+      box-shadow: 0 10px 24px -10px rgba(0,0,0,0.4);
+    }
+    .btn-x-share:hover {
+      background: #222;
+      border-color: #222;
+      transform: translateY(-3px);
+    }
+
+    /* =========================================================
+       RESPONSIVE BREAKPOINTS
+       ========================================================= */
+    @media (max-width: 1024px) {
+      .wrap { padding: 0 32px; }
+    }
+    @media (max-width: 720px) {
+      :root { --nav-h: 72px; }
+      .wrap { padding: 0 20px; }
+      .article-content { padding: 0 16px; }
+      .article-ctas-box { padding: 28px 20px; }
+    }
+    @media (max-width: 600px) {
+      .cta-actions-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .btn {
+        width: 100%;
+        font-size: 0.88rem;
+        padding: 12px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Article Header Section -->
   <header class="article-header">
     <div class="article-header-inner">
       <a href="/articles" class="back-link">← Back to all articles</a>
@@ -138,6 +472,7 @@ const articleSchema = {
     </div>
   </header>
 
+  <!-- Featured Image Banner -->
   <div class="article-hero-media">
     {article.coverImage ? (
       <img src={article.coverImage} alt={article.title} class="article-hero-img" />
@@ -146,10 +481,12 @@ const articleSchema = {
     )}
   </div>
 
+  <!-- Article Content Body -->
   <main class="article-content-wrapper">
     <article class="article-content">
       <div class="markdoc-content" set:html={htmlContent} />
 
+      <!-- Required End-of-Article CTAs Box -->
       <div class="article-ctas-box">
         <h4>Enjoyed this insight?</h4>
         <p>Help spread the word or let's collaborate on your next growth campaign.</p>
@@ -168,187 +505,6 @@ const articleSchema = {
 
     </article>
   </main>
-</BaseLayout>
 
-<style is:global>
-.article-header {
-  position: relative;
-  padding: calc(var(--nav-h, 84px) + 50px) 0 40px;
-  background:
-    radial-gradient(50% 60% at 80% 20%, rgba(232,93,138,0.15), transparent 70%),
-    linear-gradient(150deg, var(--wine-1, #3A0F2C) 0%, var(--wine-2, #5C1B41) 100%);
-  color: #fff;
-  text-align: center;
-}
-.article-header-inner {
-  max-width: var(--article-max, 780px);
-  margin: 0 auto;
-  padding: 0 24px;
-}
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--rose-bright, #FF8FB3);
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 28px;
-  transition: transform .2s ease;
-}
-.back-link:hover { transform: translateX(-4px); }
-
-.article-meta-top {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-.article-tag {
-  background: rgba(232,93,138,0.25);
-  border: 1px solid rgba(255,143,179,0.3);
-  color: var(--rose-bright, #FF8FB3);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 6px 14px;
-  border-radius: 999px;
-}
-.article-date-read {
-  font-size: 0.88rem;
-  color: rgba(255,241,246,0.75);
-}
-
-.article-header h1 {
-  font-size: clamp(2.2rem, 1.4rem + 2.5vw, 3.6rem);
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-.article-subtitle {
-  font-size: 1.15rem;
-  color: rgba(255,241,246,0.85);
-  line-height: 1.6;
-  max-width: 680px;
-  margin: 0 auto;
-}
-
-.article-hero-media {
-  max-width: 940px;
-  margin: -40px auto 0;
-  padding: 0 24px;
-  position: relative;
-  z-index: 2;
-}
-.article-hero-img {
-  aspect-ratio: 16/9;
-  width: 100%;
-  object-fit: cover;
-  background: linear-gradient(150deg, #E9A0BC, #7A2450);
-  border-radius: var(--radius-lg, 32px);
-  box-shadow: var(--shadow-lg, 0 40px 80px -28px rgba(43,27,46,0.40));
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  color: #fff;
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-size: 1.1rem;
-  border: 4px solid #fff;
-}
-
-.article-content-wrapper { padding: 60px 0 80px; }
-.article-content {
-  max-width: var(--article-max, 780px);
-  margin: 0 auto;
-  padding: 0 24px;
-  font-size: 1.1rem;
-  line-height: 1.78;
-  color: var(--ink-soft, #5B4A5E);
-}
-.article-content :global(> * + *) { margin-top: 1.6em; }
-.article-content :global(h2) {
-  font-size: 1.9rem;
-  color: var(--ink, #2B1B2E);
-  margin-top: 2.2em;
-  margin-bottom: 0.6em;
-}
-.article-content :global(h3) {
-  font-size: 1.4rem;
-  color: var(--ink, #2B1B2E);
-  margin-top: 1.8em;
-  margin-bottom: 0.5em;
-}
-.article-content :global(p) { margin: 0; }
-.article-content :global(strong) { color: var(--ink, #2B1B2E); }
-.article-content :global(ul), .article-content :global(ol) {
-  padding-left: 24px;
-  margin: 1.2em 0;
-}
-.article-content :global(li) { margin-bottom: 0.5em; }
-.article-content :global(blockquote) {
-  margin: 2em 0;
-  padding: 24px 32px;
-  background: var(--cream-alt, #F6E9EC);
-  border-left: 4px solid var(--rose, #E85D8A);
-  border-radius: 0 var(--radius-sm, 16px) var(--radius-sm, 16px) 0;
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-size: 1.2rem;
-  color: var(--wine-1, #3A0F2C);
-}
-
-.article-ctas-box {
-  max-width: var(--article-max, 780px);
-  margin: 40px auto 0;
-  padding: 40px;
-  background: #fff;
-  border: 1px solid var(--line, rgba(43,27,46,0.12));
-  border-radius: var(--radius-lg, 32px);
-  box-shadow: var(--shadow-md, 0 24px 48px -20px rgba(43,27,46,0.30));
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  text-align: center;
-}
-.article-ctas-box h4 {
-  font-size: 1.5rem;
-  color: var(--ink, #2B1B2E);
-}
-.article-ctas-box p {
-  font-size: 0.98rem;
-  color: var(--ink-soft, #5B4A5E);
-  margin: 0;
-  line-height: 1.5;
-}
-.cta-actions-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-  width: 100%;
-}
-.btn-x-share {
-  background: #000;
-  color: #fff;
-  border-color: #000;
-  box-shadow: 0 10px 24px -10px rgba(0,0,0,0.4);
-}
-.btn-x-share:hover {
-  background: #222;
-  border-color: #222;
-  transform: translateY(-3px);
-}
-
-@media (max-width: 720px) {
-  .article-content { padding: 0 16px; }
-  .article-ctas-box { padding: 28px 20px; }
-}
-@media (max-width: 600px) {
-  .cta-actions-row { flex-direction: column; gap: 12px; }
-  .btn { width: 100%; font-size: 0.88rem; padding: 12px 18px; }
-}
-</style>
+</body>
+</html>
