@@ -43,6 +43,12 @@ export default config({
           publicPath: '/images/articles/',
         }),
         content: fields.markdoc({ label: 'Article Body' }),
+        footerSpacer: fields.text({
+          label: 'Built by Emmy STACK01',
+          description: 'This field is intentionally unused — keeps the dashboard scroll bug from hiding real fields. So do not input anything here.',
+          validation: { isRequired: false },
+          defaultValue: '',
+        }),
       },
     }),
   },
