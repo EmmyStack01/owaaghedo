@@ -24,7 +24,9 @@ export default config({
       label: 'Articles',
       slugField: 'title',
       path: 'src/content/articles/*',
-      format: { contentField: 'content' },
+      format: { 
+        data: 'yaml',
+        contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Title' } }),
         category: fields.select({
