@@ -3,57 +3,48 @@ export const prerender = true;
 
 import { createReader } from '@keystatic/core/reader';
 import { DocumentRenderer } from '@keystatic/core/renderer';
-import Markdoc from '@markdoc/markdoc';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import keystaticConfig from '../../../keystatic.config';
 
-// 1. Generate Static Paths from Keystatic Collection
+// 1. Generate Static Paths
 export async function getStaticPaths() {
   const reader = createReader(process.cwd(), keystaticConfig);
   const articles = await reader.collections.articles.all();
 
   return articles.map((article) => ({
     params: { slug: article.slug },
-    props: { article: article.entry, slug: article.slug },
+    props: { slug: article.slug },
   }));
 }
 
-const { article, slug } = Astro.props;
+const { slug } = Astro.props;
 
-// 2. Resolve Markdoc AST nodes with Multi-tier Fallbacks
-let documentNodes: any = null;
+// 2. Read full article entry directly using the reader & slug
+const reader = createReader(process.cwd(), keystaticConfig);
+const article = await reader.collections.articles.read(slug);
+
+if (!article) {
+  throw new Error(`Article not found for slug: ${slug}`);
+}
+
+// 3. Resolve Document AST nodes reliably
+let documentNodes: any[] = [];
 
 try {
-  // Method A: Keystatic content reader function / promise
-  const rawContent = typeof article.content === 'function' 
+  const contentData = typeof article.content === 'function' 
     ? await article.content() 
     : await article.content;
 
-  if (Array.isArray(rawContent) && rawContent.length > 0) {
-    documentNodes = rawContent;
-  } else if (rawContent?.node) {
-    documentNodes = Array.isArray(rawContent.node) ? rawContent.node : [rawContent.node];
-  } else if (rawContent?.children && Array.isArray(rawContent.children)) {
-    documentNodes = rawContent.children;
-  }
-
-  // Method B: Direct filesystem read fallback if Keystatic Reader AST is empty
-  if (!documentNodes || (Array.isArray(documentNodes) && documentNodes.length === 0)) {
-    const filePath = path.join(process.cwd(), 'src/content/articles', `${slug}.mdoc`);
-    const fileRaw = await fs.readFile(filePath, 'utf-8');
-    
-    // Parse raw .mdoc file directly via Markdoc engine
-    const ast = Markdoc.parse(fileRaw);
-    if (ast && ast.children) {
-      documentNodes = ast.children;
-    }
+  if (Array.isArray(contentData)) {
+    documentNodes = contentData;
+  } else if (contentData && typeof contentData === 'object') {
+    // Keystatic document objects usually nest AST under node or children
+    documentNodes = contentData.node || contentData.children || (Array.isArray(contentData) ? contentData : []);
   }
 } catch (e) {
-  console.error(`[Keystatic Content Resolution Error] ${slug}:`, e);
+  console.error(`Error resolving article AST for ${slug}:`, e);
 }
 
-// 3. Metadata, URLs, and JSON-LD Schema Setup
+// 4. Metadata, URLs, and JSON-LD Schema Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const coverImageUrl = article.coverImage ? new URL(article.coverImage, siteUrl).href : `${siteUrl}/asset/og-image.jpg`;
@@ -450,7 +441,7 @@ const articleSchema = {
   <main class="article-content-wrapper">
     <article class="article-content">
       <div class="markdoc-body">
-        {documentNodes ? (
+        {documentNodes && documentNodes.length > 0 ? (
           <DocumentRenderer document={documentNodes} />
         ) : (
           <p>No content available for this article.</p>
