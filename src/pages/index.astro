@@ -1,18 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
-import { createReader } from '@keystatic/core/reader';
-import keystaticConfig from '../../keystatic.config';
+import { getSiteSettings } from '../lib/keystatic';
 
-// Initialize Keystatic Reader for Site Settings
-const reader = createReader(process.cwd(), keystaticConfig);
-
-// Fetch Site Settings
-const siteSettings = await reader.singletons.siteSettings.read();
-
-// Ensure empty string inputs from CMS don't bypass fallbacks
-const email = siteSettings?.email?.trim() || 'owasaghedo2@gmail.com';
-const twitterUrl = siteSettings?.twitterUrl?.trim() || 'https://x.com/KRAghedo';
-const facebookUrl = siteSettings?.facebookUrl?.trim() || 'https://www.facebook.com/share/1DSUPtEhqk';
+// Fetch dynamic Site Settings (email, twitterUrl, facebookUrl) with fallbacks
+const { email, twitterUrl, facebookUrl } = await getSiteSettings();
 
 // Meta defaults
 const title = "Owa | Web3 Storyteller & KOL";
@@ -24,7 +15,6 @@ const rawArticles = await getCollection('articles');
 // Transform, sort, and fetch the 3 most recent articles
 const recentArticles = rawArticles
   .map((item) => {
-    // Handle both Astro collection structure (data) and Keystatic object fallback
     const data = item.data || item;
     const rawDate = data.pubDate || '';
     const parsedTimestamp = rawDate ? Date.parse(rawDate) : 0;
