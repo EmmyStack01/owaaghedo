@@ -31,6 +31,58 @@ const recentArticles = rawArticles
   })
   .sort((a, b) => b.timestamp - a.timestamp)
   .slice(0, 3);
+
+// Site metadata for Schema JSON-LD
+const siteUrl = "https://owaaghedo.pages.dev";
+
+const schemaData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      "url": siteUrl,
+      "name": "Owa Aghedo",
+      "publisher": { "@id": `${siteUrl}/#person` }
+    },
+    {
+      "@type": "Person",
+      "@id": `${siteUrl}/#person`,
+      "name": "Owa Aghedo",
+      "jobTitle": "Web3 Marketer & KOL",
+      "url": siteUrl,
+      "image": `${siteUrl}/asset/owa-hero-image.png`,
+      "sameAs": [twitterUrl, facebookUrl].filter(Boolean),
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Coinrency"
+      }
+    },
+    {
+      "@type": "ItemList",
+      "name": "Latest Articles",
+      "itemListElement": recentArticles.map((article, idx) => {
+        const item: Record<string, any> = {
+          "@type": "BlogPosting",
+          "headline": article.title,
+          "description": article.excerpt,
+          "url": `${siteUrl}/articles/${article.slug}`,
+          "author": { "@id": `${siteUrl}/#person` }
+        };
+
+        if (article.pubDate) {
+          item["datePublished"] = new Date(article.pubDate).toISOString();
+        }
+
+        return {
+          "@type": "ListItem",
+          "position": idx + 1,
+          "item": item
+        };
+      })
+    }
+  ]
+};
 ---
 
 <!DOCTYPE html>
@@ -49,6 +101,8 @@ const recentArticles = rawArticles
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png">
   <link rel="manifest" href="/favicon_io/site.webmanifest">
+
+  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
 
   <style is:global>
     /* =========================================================
