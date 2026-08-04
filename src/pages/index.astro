@@ -1065,18 +1065,30 @@ const recentArticles = rawArticles
   /* ---------- Scroll reveal ---------- */
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var revealEls = document.querySelectorAll('.reveal');
-  if (reduceMotion || !('IntersectionObserver' in window)){
+  
+  if (reduceMotion || !('IntersectionObserver' in window)) {
     revealEls.forEach((el) => el.classList.add('in-view'));
   } else {
     var observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting){
+        if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
           observer.unobserve(entry.target);
         }
       });
     }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-    revealEls.forEach((el) => observer.observe(el));
+  
+    revealEls.forEach((el) => {
+      // Disable scroll reveal for .bio-card on screens 980px and below
+      var isBioCard = el.classList.contains('bio-card');
+      var isSmallScreen = window.innerWidth <= 980;
+  
+      if (isBioCard && isSmallScreen) {
+        el.classList.add('in-view');
+      } else {
+        observer.observe(el);
+      }
+    });
   }
 
   /* ---------- Active nav link on scroll ---------- */
