@@ -1,0 +1,265 @@
+---
+const title = "404 - Page Not Found | Owa | Web3 Storyteller & KOL";
+const description = "The page you are looking for doesn't exist or has been moved. Return to Owa's portfolio and timeline.";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Prevents Search Engines from Indexing the 404 Page -->
+  <meta name="robots" content="noindex, follow" />
+  
+  <title>{title}</title>
+  <meta name="description" content={description} />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <section class="error-page">
+    <div class="wrap">
+      <div class="error-card">
+        <div class="error-badge">404</div>
+        <h1>Lost on the Timeline?</h1>
+        <p>The page or insight you're looking for has been moved, renamed, or no longer exists in this block.</p>
+
+        <!-- Quick Search -->
+        <form action="/articles" method="GET" class="error-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" name="search" placeholder="Search articles or topics..." aria-label="Search articles" />
+        </form>
+
+        <!-- Actions -->
+        <div class="error-actions">
+          <a href="/" class="btn btn-primary">← Return Home</a>
+          <a href="/articles" class="btn btn-secondary">Explore Articles</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
+
+<style is:global>
+/* =========================================================
+   TOKENS & BASE STYLES
+   ========================================================= */
+:root {
+  --rose: #E85D8A;
+  --rose-bright: #FF8FB3;
+  --rose-deep: #B8386A;
+  --wine-1: #3A0F2C;
+  --wine-2: #5C1B41;
+  --cream: #FBF3F0;
+  --cream-alt: #F6E9EC;
+  --ink: #2B1B2E;
+  --ink-soft: #5B4A5E;
+  --line: rgba(43,27,46,0.12);
+  --radius: 24px;
+  --max: 1220px;
+
+  --shadow-rose: 0 14px 30px -10px rgba(184,56,106,0.55);
+  --shadow-lg: 0 40px 80px -28px rgba(43,27,46,0.40);
+
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+
+body::-webkit-scrollbar { width: 8px; }
+body::-webkit-scrollbar-track { background: #fff; }
+body::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 10px; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3 {
+  font-family: 'Fraunces', serif;
+  margin: 0;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+::selection { background: var(--rose); color: #fff; }
+
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--rose-bright);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* =========================================================
+   404 HERO / MAIN SECTION
+   ========================================================= */
+.error-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  background:
+    radial-gradient(60% 60% at 80% 20%, rgba(232,93,138,0.22), transparent 70%),
+    linear-gradient(150deg, var(--wine-1) 0%, var(--wine-2) 100%);
+  color: #fff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.error-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius);
+  padding: 60px 40px;
+  max-width: 640px;
+  margin: 0 auto;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
+}
+
+.error-badge {
+  display: inline-block;
+  font-family: 'Fraunces', serif;
+  font-size: clamp(4rem, 8vw, 7rem);
+  font-weight: 700;
+  background: linear-gradient(120deg, var(--rose-bright), #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.error-page h1 {
+  font-size: clamp(1.8rem, 2vw + 1rem, 2.8rem);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.error-page p {
+  color: rgba(255, 241, 246, 0.82);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0 auto 32px;
+  max-width: 460px;
+}
+
+/* =========================================================
+   SEARCH BAR
+   ========================================================= */
+.error-search {
+  position: relative;
+  max-width: 420px;
+  margin: 0 auto 32px;
+}
+
+.error-search input {
+  width: 100%;
+  padding: 14px 20px 14px 48px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  transition: border-color .3s ease, box-shadow .3s ease;
+}
+
+.error-search input:focus {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 4px rgba(232,93,138,0.25);
+  outline: none;
+}
+
+.error-search svg {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+/* =========================================================
+   BUTTONS & CTAs
+   ========================================================= */
+.error-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s var(--ease), color .3s var(--ease);
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, var(--rose), var(--rose-deep));
+  color: #fff;
+  box-shadow: var(--shadow-rose);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -12px rgba(184,56,106,0.7);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-3px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .wrap { padding: 0 20px; }
+  .error-card { padding: 40px 20px; }
+  .error-actions { flex-direction: column; }
+  .btn { width: 100%; }
+}
+</style>
