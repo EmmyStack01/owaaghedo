@@ -1,13 +1,14 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const articles = defineCollection({
-  type: 'content', // handles .md and .mdoc
+  loader: glob({ pattern: '**/*.mdoc', base: './src/content/articles' }),
   schema: z.object({
     title: z.string(),
-    pubDate: z.string().or(z.date()).optional(),
-    excerpt: z.string().optional(),
+    category: z.string(),
+    excerpt: z.string(),
+    pubDate: z.coerce.date(),
     coverImage: z.string().optional(),
-    category: z.string().optional(),
   }),
 });
 
