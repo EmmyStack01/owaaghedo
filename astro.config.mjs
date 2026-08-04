@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
+import markdoc from '@astrojs/markdoc'; // <--- 1. Import Markdoc
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
@@ -14,6 +15,7 @@ export default defineConfig({
   integrations: [
     react(),
     keystatic(),
+    markdoc(), // <--- 2. Add Markdoc integration here!
     sitemap({
       filter: (page) => 
         !page.includes('/keystatic') && 
@@ -32,7 +34,6 @@ export default defineConfig({
       external: ['node:authtoken', 'node:fs', 'node:path', 'node:crypto'],
     },
     build: {
-      // Ensures CSS/JS bundle filenames don't get messed up during Worker compilation
       cssCodeSplit: true,
       rollupOptions: {
         output: {
