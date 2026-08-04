@@ -7,7 +7,7 @@ const rawArticles = await getCollection('articles');
 // Transform & sort articles by published date (Newest first)
 const articles = rawArticles
   .map((article) => ({
-    slug: article.slug,
+    slug: article.id, // Astro v5 uses article.id for the file slug/path
     title: article.data.title || '',
     summary: article.data.excerpt || article.data.summary || '',
     coverImage: article.data.coverImage || '',
@@ -385,6 +385,26 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
     .cta-hire { color: var(--rose-deep); }
     .cta-hire:hover { color: var(--wine-1); text-decoration: underline; }
 
+    /* Empty state styling */
+    .no-articles {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+      background: #fff;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+    }
+    .no-articles h3 {
+      font-size: 1.5rem;
+      color: var(--wine-1);
+      margin-bottom: 8px;
+    }
+    .no-articles p {
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+      margin: 0;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .articles-grid { grid-template-columns: 1fr 1fr; }
@@ -499,6 +519,12 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
           );
         })}
       </div>
+
+      <!-- Empty State Container -->
+      <div class="no-articles" id="noArticles">
+        <h3>Article doesn't exist</h3>
+        <p>No matching articles were found. Try searching for a different keyword or category.</p>
+      </div>
     </div>
   </section>
 
@@ -509,6 +535,7 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
     const categoryBtns = document.querySelectorAll('.cat-btn');
     const articlesContainer = document.getElementById('articlesGrid');
     const articleCards = Array.from(document.querySelectorAll('.article-card')) as HTMLElement[];
+    const noArticlesMsg = document.getElementById('noArticles');
 
     let activeCategory = 'all';
 
@@ -533,6 +560,17 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
           card.style.display = 'none';
         }
       });
+
+      // Show/Hide "Article doesn't exist" message
+      if (noArticlesMsg && articlesContainer) {
+        if (visibleCards.length === 0) {
+          noArticlesMsg.style.display = 'block';
+          articlesContainer.style.display = 'none';
+        } else {
+          noArticlesMsg.style.display = 'none';
+          articlesContainer.style.display = 'grid';
+        }
+      }
 
       // Sort visible elements inside DOM
       visibleCards.sort((a, b) => {
