@@ -36,6 +36,57 @@ const { email, twitterUrl, facebookUrl } = await getSiteSettings();
   <meta property="twitter:title" content="About Owa | Web3 Storyteller & KOL">
   <meta property="twitter:description" content="Learn more about Owa — Web3 Marketer, Growth Strategist, and Storyteller turning complex crypto into human connections.">
   <meta property="twitter:image" content="/asset/og-image.jpg">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://owaaghedo.com/#person",
+        "name": "Owa Aghedo",
+        "alternateName": ["Owa", "KRAghedo"],
+        "jobTitle": ["Web3 Marketer", "Growth Strategist", "KOL", "Project Manager"],
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Coinrency"
+        },
+        "description": "Web3 Marketer, Growth Strategist, Community Builder, and Storyteller turning complex crypto ideas into human connections.",
+        "image": "https://owaaghedo.com/asset/owa-hero-image.png",
+        "email": "mailto:owasaghedo2@gmail.com",
+        "sameAs": [
+          "https://x.com/KRAghedo",
+          "https://www.facebook.com/share/1DSUPtEhqk"
+        ],
+        "knowsAbout": [
+          "Web3 Marketing",
+          "Blockchain Technology",
+          "Crypto Community Building",
+          "KOL Management",
+          "Content Strategy"
+        ]
+      },
+      {
+        "@type": "AboutPage",
+        "@id": "https://owaaghedo.com/about#webpage",
+        "url": "https://owaaghedo.com/about",
+        "name": "About Owa | Web3 Storyteller & KOL",
+        "about": { "@id": "https://owaaghedo.com/#person" }
+      },
+      {
+        "@type": "Service",
+        "name": "Web3 Content & Growth Strategy",
+        "provider": { "@id": "https://owaaghedo.com/#person" },
+        "serviceType": [
+          "Web3 Marketing",
+          "Community Building",
+          "KOL Management",
+          "Crypto Content Writing"
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
