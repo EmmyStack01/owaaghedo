@@ -1,14 +1,8 @@
 ---
-import { createReader } from '@keystatic/core/reader';
-import keystaticConfig from '../../keystatic.config';
+import { getSiteSettings } from '../lib/keystatic';
 
 // Fetch dynamic global contact details from Keystatic Site Settings
-const reader = createReader(process.cwd(), keystaticConfig);
-const siteSettings = await reader.singletons.siteSettings.read();
-
-const email = siteSettings?.email ?? 'owasaghedo2@gmail.com';
-const twitterUrl = siteSettings?.twitterUrl ?? 'https://x.com/KRAghedo';
-const facebookUrl = siteSettings?.facebookUrl ?? 'https://www.facebook.com/share/1DSUPtEhqk';
+const { email, twitterUrl, facebookUrl } = await getSiteSettings();
 ---
 
 <!DOCTYPE html>
