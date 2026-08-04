@@ -29,15 +29,6 @@ const description = "The page you are looking for doesn't exist or has been move
         <h1>Lost on the Timeline?</h1>
         <p>The page or insight you're looking for has been moved, renamed, or no longer exists in this block.</p>
 
-        <!-- Quick Search -->
-        <form action="/articles" method="GET" class="error-search">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input type="text" name="search" placeholder="Search articles or topics..." aria-label="Search articles" />
-        </form>
-
         <!-- Actions -->
         <div class="error-actions">
           <a href="/" class="btn btn-primary">← Return Home</a>
@@ -173,41 +164,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   line-height: 1.6;
   margin: 0 auto 32px;
   max-width: 460px;
-}
-
-/* =========================================================
-   SEARCH BAR
-   ========================================================= */
-.error-search {
-  position: relative;
-  max-width: 420px;
-  margin: 0 auto 32px;
-}
-
-.error-search input {
-  width: 100%;
-  padding: 14px 20px 14px 48px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 0.95rem;
-  color: var(--ink);
-  transition: border-color .3s ease, box-shadow .3s ease;
-}
-
-.error-search input:focus {
-  border-color: var(--rose);
-  box-shadow: 0 0 0 4px rgba(232,93,138,0.25);
-  outline: none;
-}
-
-.error-search svg {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--ink-soft);
-  pointer-events: none;
 }
 
 /* =========================================================
