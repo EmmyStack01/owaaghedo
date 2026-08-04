@@ -19,12 +19,29 @@ export default defineConfig({
     sitemap({
       filter: (page) => 
         !page.includes('/keystatic') && 
-        !page.includes('/api/'),
+        !page.includes('/api/') &&
+        !page.includes('/404'),
       changefreq: 'weekly',
       priority: 0.7,
       lastmod: new Date(),
       serialize(item) {
-        item.url = item.url.replace(/\/$/, '');
+        // Parse current path
+        const urlObj = new URL(item.url);
+        const pathname = urlObj.pathname;
+
+        // Match individual article pages (e.g., /articles/some-slug or /articles/some-slug/)
+        const isArticleSlug = /^\/articles\/.+/.test(pathname);
+
+        if (isArticleSlug) {
+          // Force trailing slash for article detail pages
+          if (!item.url.endsWith('/')) {
+            item.url = `${item.url}/`;
+          }
+        } else {
+          // Remove trailing slash for root and main pages (like /about, /articles)
+          item.url = item.url.replace(/\/$/, '');
+        }
+
         return item;
       }
     }),
