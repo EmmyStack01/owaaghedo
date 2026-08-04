@@ -3,9 +3,6 @@ export const prerender = true;
 
 import { createReader } from '@keystatic/core/reader';
 import { DocumentRenderer } from '@keystatic/core/renderer';
-import Markdoc from '@markdoc/markdoc';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import keystaticConfig from '../../../keystatic.config';
 
 // 1. Generate Static Paths
@@ -21,7 +18,7 @@ export async function getStaticPaths() {
 
 const { slug } = Astro.props;
 
-// 2. Read full article metadata directly
+// 2. Fetch Article & Extract Document Content
 const reader = createReader(process.cwd(), keystaticConfig);
 const article = await reader.collections.articles.read(slug);
 
@@ -29,49 +26,17 @@ if (!article) {
   throw new Error(`Article not found for slug: ${slug}`);
 }
 
-// 3. Extract Document AST with File System Fallback
-let documentNodes: any = null;
+// Keystatic's content() returns the AST array/document object needed by DocumentRenderer
+const contentTree = typeof article.content === 'function' ? await article.content() : null;
 
-try {
-  // Method A: Keystatic Reader content execution
-  if (typeof article.content === 'function') {
-    const rawContent = await article.content();
-    if (Array.isArray(rawContent)) {
-      documentNodes = rawContent;
-    } else if (rawContent?.node) {
-      documentNodes = rawContent.node;
-    } else if (rawContent?.children) {
-      documentNodes = rawContent.children;
-    }
-  }
+// Ensure document is passed as an array if wrapped inside an object node
+const documentNodes = Array.isArray(contentTree) 
+  ? contentTree 
+  : contentTree?.node 
+    ? contentTree.node 
+    : contentTree;
 
-  // Method B: Direct File System Read Fallback (.mdoc / .md)
-  if (!documentNodes || (Array.isArray(documentNodes) && documentNodes.length === 0)) {
-    const articlesDir = path.join(process.cwd(), 'src/content/articles', slug);
-    let filePath = `${articlesDir}/index.mdoc`;
-    
-    // Check if it's single file slug.mdoc or folder/index.mdoc
-    try {
-      await fs.access(filePath);
-    } catch {
-      filePath = path.join(process.cwd(), 'src/content/articles', `${slug}.mdoc`);
-    }
-
-    const fileContent = await fs.readFile(filePath, 'utf-8');
-    
-    // Strip YAML frontmatter if present and parse AST via Markdoc
-    const cleanContent = fileContent.replace(/^---[\s\S]*?---/, '').trim();
-    const ast = Markdoc.parse(cleanContent);
-    
-    if (ast && ast.children) {
-      documentNodes = ast.children;
-    }
-  }
-} catch (err) {
-  console.error(`Failed to resolve document content for ${slug}:`, err);
-}
-
-// 4. Metadata, URLs, and JSON-LD Schema Setup
+// 3. Metadata Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const coverImageUrl = article.coverImage ? new URL(article.coverImage, siteUrl).href : `${siteUrl}/asset/og-image.jpg`;
@@ -82,7 +47,7 @@ const formattedDate = article.pubDate ? new Date(article.pubDate).toLocaleDateSt
   year: 'numeric',
 }) : '';
 
-const tweetText = encodeURIComponent(`Just read this brilliant piece: "${article.title}" by @KRAghedo! ${canonicalUrl}`);
+const tweetText = encodeURIComponent(`Just read this piece: "${article.title}" by @KRAghedo! ${canonicalUrl}`);
 
 const articleSchema = {
   "@context": "https://schema.org",
@@ -464,35 +429,35 @@ const articleSchema = {
     )}
   </div>
 
-  <!-- Article Content Body -->
-  <main class="article-content-wrapper">
-    <article class="article-content">
-      <div class="markdoc-body">
-        {documentNodes ? (
-          <DocumentRenderer document={documentNodes} />
-        ) : (
-          <p>No content available for this article.</p>
-        )}
-      </div>
-
-      <!-- Required End-of-Article CTAs Box -->
-      <div class="article-ctas-box">
-        <h4>Enjoyed this insight?</h4>
-        <p>Help spread the word or let's collaborate on your next growth campaign.</p>
-        <div class="cta-actions-row">
-          <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="btn btn-x-share" target="_blank" rel="noopener">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
-            Share this on X and tag me
-          </a>
-          <a href="/#contact" class="btn btn-primary">
-            Want content like this for your project? Hire me →
-          </a>
+ <!-- Article Content Body -->
+    <main class="article-content-wrapper">
+      <article class="article-content">
+        <div class="markdoc-body">
+          {documentNodes && Array.isArray(documentNodes) && documentNodes.length > 0 ? (
+            <DocumentRenderer document={documentNodes} />
+          ) : (
+            <p>No content available for this article.</p>
+          )}
         </div>
-      </div>
-    </article>
-  </main>
+
+        <!-- End-of-Article CTAs -->
+        <div class="article-ctas-box">
+          <h4>Enjoyed this insight?</h4>
+          <p>Help spread the word or let's collaborate on your next growth campaign.</p>
+          <div class="cta-actions-row">
+            <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="btn btn-x-share" target="_blank" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              Share this on X and tag me
+            </a>
+            <a href="/#contact" class="btn btn-primary">
+              Want content like this for your project? Hire me →
+            </a>
+          </div>
+        </div>
+      </article>
+    </main>
 
 </body>
 </html>
