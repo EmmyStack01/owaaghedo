@@ -3,7 +3,7 @@ export const prerender = true;
 
 import { getCollection, render } from 'astro:content';
 
-// 1. Generate Static Paths using Astro's Content Collection
+// 1. Fetch static paths at build time
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
   return articles.map((entry) => ({
@@ -12,12 +12,12 @@ export async function getStaticPaths() {
   }));
 }
 
-// 2. Extract Entry and Render Content Component
+// 2. Get entry props and render native Astro Content
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const article = entry.data;
 
-// 3. Metadata Setup
+// 3. Metadata & Share URLs
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const coverImageUrl = article.coverImage ? new URL(article.coverImage, siteUrl).href : `${siteUrl}/asset/og-image.jpg`;
@@ -146,9 +146,6 @@ const articleSchema = {
       border-radius: 8px;
     }
 
-    /* =========================================================
-       BUTTONS
-       ========================================================= */
     .btn {
       display: inline-flex; 
       align-items: center; 
@@ -174,9 +171,6 @@ const articleSchema = {
       box-shadow: 0 20px 40px -12px rgba(184,56,106,0.65);
     }
 
-    /* =========================================================
-       ARTICLE HERO / HEADER
-       ========================================================= */
     .article-header {
       position: relative;
       padding: calc(var(--nav-h) + 50px) 0 40px;
@@ -240,9 +234,6 @@ const articleSchema = {
       margin: 0 auto;
     }
 
-    /* =========================================================
-       FEATURED IMAGE BANNER
-       ========================================================= */
     .article-hero-media {
       max-width: 940px;
       margin: -40px auto 0;
@@ -267,9 +258,6 @@ const articleSchema = {
       border: 4px solid #fff;
     }
 
-    /* =========================================================
-       ARTICLE CONTENT BODY
-       ========================================================= */
     .article-content-wrapper { padding: 60px 0 80px; }
     .article-content {
       max-width: var(--article-max);
@@ -280,6 +268,7 @@ const articleSchema = {
       color: var(--ink-soft);
     }
 
+    /* Target rendered Markdoc tags directly */
     .markdoc-body { color: var(--ink-soft); }
     .markdoc-body > * + * { margin-top: 1.6em; }
     .markdoc-body h2 {
@@ -313,9 +302,6 @@ const articleSchema = {
       color: var(--wine-1);
     }
 
-    /* =========================================================
-       REQUIRED END-OF-ARTICLE CTAs
-       ========================================================= */
     .article-ctas-box {
       max-width: var(--article-max);
       margin: 40px auto 0;
@@ -360,9 +346,6 @@ const articleSchema = {
       transform: translateY(-3px);
     }
 
-    /* =========================================================
-       RESPONSIVE BREAKPOINTS
-       ========================================================= */
     @media (max-width: 1024px) {
       .wrap { padding: 0 32px; }
     }
@@ -387,7 +370,7 @@ const articleSchema = {
 </head>
 <body>
 
-  <!-- Article Header Section -->
+  <!-- Header -->
   <header class="article-header">
     <div class="article-header-inner">
       <a href="/articles" class="back-link">← Back to all articles</a>
@@ -400,7 +383,7 @@ const articleSchema = {
     </div>
   </header>
 
-  <!-- Featured Image Banner -->
+  <!-- Featured Image -->
   <div class="article-hero-media">
     {article.coverImage ? (
       <img src={article.coverImage} alt={article.title} class="article-hero-img" />
@@ -409,15 +392,15 @@ const articleSchema = {
     )}
   </div>
 
-  <!-- Article Content Body -->
+  <!-- Main Content Body -->
   <main class="article-content-wrapper">
     <article class="article-content">
       <div class="markdoc-body">
-        <!-- Renders compiled Markdoc straight to HTML -->
+        <!-- Native Astro Content Component -->
         <Content />
       </div>
 
-      <!-- End-of-Article CTAs -->
+      <!-- End CTAs -->
       <div class="article-ctas-box">
         <h4>Enjoyed this insight?</h4>
         <p>Help spread the word or let's collaborate on your next growth campaign.</p>
