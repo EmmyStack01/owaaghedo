@@ -18,9 +18,16 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 
-// 2. Resolve Markdoc content properly into an array
-const content = await article.content();
-const documentNodes = Array.isArray(content) ? content : content?.children || content?.node || [];
+// 2. Extract AST array safely for DocumentRenderer
+const rawContent = await article.content();
+
+const documentNodes = Array.isArray(rawContent) 
+  ? rawContent 
+  : (rawContent && typeof rawContent === 'object' && 'node' in rawContent && Array.isArray(rawContent.node))
+    ? rawContent.node
+    : (rawContent && typeof rawContent === 'object' && 'children' in rawContent && Array.isArray(rawContent.children))
+      ? rawContent.children
+      : [];
 
 // 3. Metadata, URLs, and JSON-LD Schema Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
@@ -419,9 +426,13 @@ const articleSchema = {
   <main class="article-content-wrapper">
     <article class="article-content">
       <div class="markdoc-body">
-        <DocumentRenderer document={documentNodes} />
+        {documentNodes && documentNodes.length > 0 ? (
+          <DocumentRenderer document={documentNodes} />
+        ) : (
+          <p>No content available for this article.</p>
+        )}
       </div>
-
+  
       <!-- Required End-of-Article CTAs Box -->
       <div class="article-ctas-box">
         <h4>Enjoyed this insight?</h4>
@@ -438,7 +449,6 @@ const articleSchema = {
           </a>
         </div>
       </div>
-
     </article>
   </main>
 
