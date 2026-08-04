@@ -1,8 +1,9 @@
 ---
+import { getCollection } from 'astro:content';
 import { createReader } from '@keystatic/core/reader';
 import keystaticConfig from '../../keystatic.config';
 
-// Initialize Keystatic Reader
+// Initialize Keystatic Reader for Site Settings
 const reader = createReader(process.cwd(), keystaticConfig);
 
 // Fetch Site Settings
@@ -17,21 +18,23 @@ const facebookUrl = siteSettings?.facebookUrl?.trim() || 'https://www.facebook.c
 const title = "Owa | Web3 Storyteller & KOL";
 const description = "Owa — Web3 Storyteller & KOL. Turning complex crypto into stories that grow communities across Africa and beyond.";
 
-// Fetch Keystatic Articles
-const rawArticles = await reader.collections.articles.all();
+// Fetch Articles using Astro's Content Collections
+const rawArticles = await getCollection('articles');
 
-// Replace this block in your frontmatter:
+// Transform, sort, and fetch the 3 most recent articles
 const recentArticles = rawArticles
-  .map(({ slug, entry }) => {
-    const rawDate = entry.pubDate || '';
+  .map((item) => {
+    // Handle both Astro collection structure (data) and Keystatic object fallback
+    const data = item.data || item;
+    const rawDate = data.pubDate || '';
     const parsedTimestamp = rawDate ? Date.parse(rawDate) : 0;
     
     return {
-      slug,
-      title: entry.title || '',
-      excerpt: entry.excerpt || '',
-      coverImage: entry.coverImage || '',
-      category: entry.category || 'Web3',
+      slug: item.slug || data.slug || item.id,
+      title: data.title || '',
+      excerpt: data.excerpt || '',
+      coverImage: data.coverImage || '',
+      category: data.category || 'Web3',
       pubDate: rawDate,
       timestamp: isNaN(parsedTimestamp) ? 0 : parsedTimestamp,
     };
