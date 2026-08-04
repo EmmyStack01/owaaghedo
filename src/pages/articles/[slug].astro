@@ -18,16 +18,24 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 
-// 2. Extract AST array safely for DocumentRenderer
-const rawContent = await article.content();
+// 2. Extract content AST
+// If article.content is a function, await it; otherwise fallback to article.content
+let documentNodes = [];
 
-const documentNodes = Array.isArray(rawContent) 
-  ? rawContent 
-  : (rawContent && typeof rawContent === 'object' && 'node' in rawContent && Array.isArray(rawContent.node))
-    ? rawContent.node
-    : (rawContent && typeof rawContent === 'object' && 'children' in rawContent && Array.isArray(rawContent.children))
-      ? rawContent.children
-      : [];
+try {
+  const resolvedContent = typeof article.content === 'function' 
+    ? await article.content() 
+    : await article.content;
+
+  // Handle case where content might be wrapped inside an object
+  if (Array.isArray(resolvedContent)) {
+    documentNodes = resolvedContent;
+  } else if (resolvedContent && typeof resolvedContent === 'object') {
+    documentNodes = resolvedContent.node || resolvedContent.children || [];
+  }
+} catch (e) {
+  console.error('Error loading article content AST:', e);
+}
 
 // 3. Metadata, URLs, and JSON-LD Schema Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
