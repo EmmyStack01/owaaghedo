@@ -10,8 +10,9 @@ export default config({
   singletons: {
     siteSettings: singleton({
       label: 'Site Settings',
-      path: 'src/content/siteSettings/',
-      format: { data: 'yaml' }, // <--- ADD THIS
+      // Change path to point to a single file location without trailing slash
+      path: 'src/content/siteSettings', 
+      format: { data: 'yaml' },
       schema: {
         email: fields.text({ label: 'Email Address' }),
         twitterUrl: fields.text({ label: 'X / Twitter URL' }),
