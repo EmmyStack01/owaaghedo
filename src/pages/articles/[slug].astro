@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import { createReader } from '@keystatic/core/reader';
+import { DocumentRenderer } from '@keystatic/core/renderer'; // Built-in Keystatic Renderer
 import keystaticConfig from '../../../keystatic.config';
 
 // 1. Generate Static Paths from Keystatic Collection
@@ -17,78 +18,8 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 
-// 2. Fetch AST and Render HTML directly
+// 2. Fetch Markdoc AST Node
 const articleContent = await article.content();
-
-function renderNodeToHtml(node: any): string {
-  if (!node) return '';
-  if (typeof node === 'string') return escapeHtml(node);
-  if (Array.isArray(node)) return node.map(renderNodeToHtml).join('');
-
-  if (node.type === 'text') {
-    let text = escapeHtml(node.value || '');
-    if (node.marks) {
-      for (const mark of node.marks) {
-        if (mark.type === 'bold') text = `<strong>${text}</strong>`;
-        if (mark.type === 'italic') text = `<em>${text}</em>`;
-        if (mark.type === 'code') text = `<code>${text}</code>`;
-        if (mark.type === 'link') text = `<a href="${escapeHtml(mark.href)}">${text}</a>`;
-      }
-    }
-    return text;
-  }
-
-  const childrenHtml = node.children ? node.children.map(renderNodeToHtml).join('') : '';
-
-  switch (node.name || node.type) {
-    case 'doc':
-    case 'document':
-      return childrenHtml;
-    case 'paragraph':
-    case 'p':
-      return `<p>${childrenHtml}</p>`;
-    case 'heading':
-    case 'h1':
-    case 'h2':
-    case 'h3':
-    case 'h4':
-      const level = node.attributes?.level || node.level || 2;
-      return `<h${level}>${childrenHtml}</h${level}>`;
-    case 'list':
-    case 'ul':
-      return `<ul>${childrenHtml}</ul>`;
-    case 'ol':
-      return `<ol>${childrenHtml}</ol>`;
-    case 'item':
-    case 'li':
-      return `<li>${childrenHtml}</li>`;
-    case 'blockquote':
-      return `<blockquote>${childrenHtml}</blockquote>`;
-    case 'link':
-    case 'a':
-      return `<a href="${escapeHtml(node.attributes?.href || '#')}">${childrenHtml}</a>`;
-    case 'code':
-    case 'codeblock':
-      return `<pre><code>${childrenHtml || escapeHtml(node.attributes?.content || '')}</code></pre>`;
-    case 'hr':
-      return `<hr />`;
-    default:
-      return childrenHtml;
-  }
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-const htmlContent = articleContent && articleContent.node 
-  ? renderNodeToHtml(articleContent.node) 
-  : '';
 
 // 3. Metadata, URLs, and JSON-LD Schema Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
@@ -353,27 +284,29 @@ const articleSchema = {
       color: var(--ink-soft);
     }
 
-    .article-content :global(> * + *) { margin-top: 1.6em; }
-    .article-content :global(h2) {
+    /* Keystatic Rendered Document Styles */
+    .markdoc-body { color: var(--ink-soft); }
+    .markdoc-body > * + * { margin-top: 1.6em; }
+    .markdoc-body h2 {
       font-size: 1.9rem;
       color: var(--ink);
       margin-top: 2.2em;
       margin-bottom: 0.6em;
     }
-    .article-content :global(h3) {
+    .markdoc-body h3 {
       font-size: 1.4rem;
       color: var(--ink);
       margin-top: 1.8em;
       margin-bottom: 0.5em;
     }
-    .article-content :global(p) { margin: 0; }
-    .article-content :global(strong) { color: var(--ink); }
-    .article-content :global(ul), .article-content :global(ol) {
+    .markdoc-body p { margin: 0 0 1em 0; }
+    .markdoc-body strong { color: var(--ink); font-weight: 600; }
+    .markdoc-body ul, .markdoc-body ol {
       padding-left: 24px;
       margin: 1.2em 0;
     }
-    .article-content :global(li) { margin-bottom: 0.5em; }
-    .article-content :global(blockquote) {
+    .markdoc-body li { margin-bottom: 0.5em; color: var(--ink-soft); }
+    .markdoc-body blockquote {
       margin: 2em 0;
       padding: 24px 32px;
       background: var(--cream-alt);
@@ -484,7 +417,9 @@ const articleSchema = {
   <!-- Article Content Body -->
   <main class="article-content-wrapper">
     <article class="article-content">
-      <div class="markdoc-content" set:html={htmlContent} />
+      <div class="markdoc-body">
+        {articleContent && <DocumentRenderer document={articleContent.node} />}
+      </div>
 
       <!-- Required End-of-Article CTAs Box -->
       <div class="article-ctas-box">
