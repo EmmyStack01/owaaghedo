@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
-import markdoc from '@astrojs/markdoc'; // <--- 1. Import Markdoc
+import markdoc from '@astrojs/markdoc';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
@@ -15,7 +15,7 @@ export default defineConfig({
   integrations: [
     react(),
     keystatic(),
-    markdoc(), // <--- 2. Add Markdoc integration here!
+    markdoc(),
     sitemap({
       filter: (page) => 
         !page.includes('/keystatic') && 
