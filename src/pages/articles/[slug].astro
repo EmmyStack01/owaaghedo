@@ -3,6 +3,9 @@ export const prerender = true;
 
 import { createReader } from '@keystatic/core/reader';
 import { DocumentRenderer } from '@keystatic/core/renderer';
+import Markdoc from '@markdoc/markdoc';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import keystaticConfig from '../../../keystatic.config';
 
 // 1. Generate Static Paths
@@ -18,7 +21,7 @@ export async function getStaticPaths() {
 
 const { slug } = Astro.props;
 
-// 2. Read full article entry directly using the reader & slug
+// 2. Read full article metadata directly
 const reader = createReader(process.cwd(), keystaticConfig);
 const article = await reader.collections.articles.read(slug);
 
@@ -26,22 +29,46 @@ if (!article) {
   throw new Error(`Article not found for slug: ${slug}`);
 }
 
-// 3. Resolve Document AST nodes reliably
-let documentNodes: any[] = [];
+// 3. Extract Document AST with File System Fallback
+let documentNodes: any = null;
 
 try {
-  const contentData = typeof article.content === 'function' 
-    ? await article.content() 
-    : await article.content;
-
-  if (Array.isArray(contentData)) {
-    documentNodes = contentData;
-  } else if (contentData && typeof contentData === 'object') {
-    // Keystatic document objects usually nest AST under node or children
-    documentNodes = contentData.node || contentData.children || (Array.isArray(contentData) ? contentData : []);
+  // Method A: Keystatic Reader content execution
+  if (typeof article.content === 'function') {
+    const rawContent = await article.content();
+    if (Array.isArray(rawContent)) {
+      documentNodes = rawContent;
+    } else if (rawContent?.node) {
+      documentNodes = rawContent.node;
+    } else if (rawContent?.children) {
+      documentNodes = rawContent.children;
+    }
   }
-} catch (e) {
-  console.error(`Error resolving article AST for ${slug}:`, e);
+
+  // Method B: Direct File System Read Fallback (.mdoc / .md)
+  if (!documentNodes || (Array.isArray(documentNodes) && documentNodes.length === 0)) {
+    const articlesDir = path.join(process.cwd(), 'src/content/articles', slug);
+    let filePath = `${articlesDir}/index.mdoc`;
+    
+    // Check if it's single file slug.mdoc or folder/index.mdoc
+    try {
+      await fs.access(filePath);
+    } catch {
+      filePath = path.join(process.cwd(), 'src/content/articles', `${slug}.mdoc`);
+    }
+
+    const fileContent = await fs.readFile(filePath, 'utf-8');
+    
+    // Strip YAML frontmatter if present and parse AST via Markdoc
+    const cleanContent = fileContent.replace(/^---[\s\S]*?---/, '').trim();
+    const ast = Markdoc.parse(cleanContent);
+    
+    if (ast && ast.children) {
+      documentNodes = ast.children;
+    }
+  }
+} catch (err) {
+  console.error(`Failed to resolve document content for ${slug}:`, err);
 }
 
 // 4. Metadata, URLs, and JSON-LD Schema Setup
@@ -441,7 +468,7 @@ const articleSchema = {
   <main class="article-content-wrapper">
     <article class="article-content">
       <div class="markdoc-body">
-        {documentNodes && documentNodes.length > 0 ? (
+        {documentNodes ? (
           <DocumentRenderer document={documentNodes} />
         ) : (
           <p>No content available for this article.</p>
