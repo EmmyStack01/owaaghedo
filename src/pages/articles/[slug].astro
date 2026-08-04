@@ -1,40 +1,21 @@
 ---
 export const prerender = true;
 
-import { createReader } from '@keystatic/core/reader';
-import { DocumentRenderer } from '@keystatic/core/renderer';
-import keystaticConfig from '../../../keystatic.config';
+import { getCollection, render } from 'astro:content';
 
-// 1. Generate Static Paths
+// 1. Generate Static Paths using Astro's Content Collection
 export async function getStaticPaths() {
-  const reader = createReader(process.cwd(), keystaticConfig);
-  const articles = await reader.collections.articles.all();
-
-  return articles.map((article) => ({
-    params: { slug: article.slug },
-    props: { slug: article.slug },
+  const articles = await getCollection('articles');
+  return articles.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
   }));
 }
 
-const { slug } = Astro.props;
-
-// 2. Fetch Article & Extract Document Content
-const reader = createReader(process.cwd(), keystaticConfig);
-const article = await reader.collections.articles.read(slug);
-
-if (!article) {
-  throw new Error(`Article not found for slug: ${slug}`);
-}
-
-// Keystatic's content() returns the AST array/document object needed by DocumentRenderer
-const contentTree = typeof article.content === 'function' ? await article.content() : null;
-
-// Ensure document is passed as an array if wrapped inside an object node
-const documentNodes = Array.isArray(contentTree) 
-  ? contentTree 
-  : contentTree?.node 
-    ? contentTree.node 
-    : contentTree;
+// 2. Extract Entry and Render Content Component
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const article = entry.data;
 
 // 3. Metadata Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
@@ -299,7 +280,6 @@ const articleSchema = {
       color: var(--ink-soft);
     }
 
-    /* Keystatic Rendered Document Styles */
     .markdoc-body { color: var(--ink-soft); }
     .markdoc-body > * + * { margin-top: 1.6em; }
     .markdoc-body h2 {
@@ -429,35 +409,32 @@ const articleSchema = {
     )}
   </div>
 
- <!-- Article Content Body -->
-    <main class="article-content-wrapper">
-      <article class="article-content">
-        <div class="markdoc-body">
-          {documentNodes && Array.isArray(documentNodes) && documentNodes.length > 0 ? (
-            <DocumentRenderer document={documentNodes} />
-          ) : (
-            <p>No content available for this article.</p>
-          )}
-        </div>
+  <!-- Article Content Body -->
+  <main class="article-content-wrapper">
+    <article class="article-content">
+      <div class="markdoc-body">
+        <!-- Renders compiled Markdoc straight to HTML -->
+        <Content />
+      </div>
 
-        <!-- End-of-Article CTAs -->
-        <div class="article-ctas-box">
-          <h4>Enjoyed this insight?</h4>
-          <p>Help spread the word or let's collaborate on your next growth campaign.</p>
-          <div class="cta-actions-row">
-            <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="btn btn-x-share" target="_blank" rel="noopener">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-              Share this on X and tag me
-            </a>
-            <a href="/#contact" class="btn btn-primary">
-              Want content like this for your project? Hire me →
-            </a>
-          </div>
+      <!-- End-of-Article CTAs -->
+      <div class="article-ctas-box">
+        <h4>Enjoyed this insight?</h4>
+        <p>Help spread the word or let's collaborate on your next growth campaign.</p>
+        <div class="cta-actions-row">
+          <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="btn btn-x-share" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            Share this on X and tag me
+          </a>
+          <a href="/#contact" class="btn btn-primary">
+            Want content like this for your project? Hire me →
+          </a>
         </div>
-      </article>
-    </main>
+      </div>
+    </article>
+  </main>
 
 </body>
 </html>
