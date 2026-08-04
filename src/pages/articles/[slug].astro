@@ -18,7 +18,7 @@ const { Content } = await render(entry);
 const article = entry.data;
 
 // 3. Metadata & Share URLs
-const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
+const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.pages.dev';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const coverImageUrl = article.coverImage ? new URL(article.coverImage, siteUrl).href : `${siteUrl}/asset/og-image.jpg`;
 
