@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import { createReader } from '@keystatic/core/reader';
-import { DocumentRenderer } from '@keystatic/core/renderer'; // Built-in Keystatic Renderer
+import { DocumentRenderer } from '@keystatic/core/renderer';
 import keystaticConfig from '../../../keystatic.config';
 
 // 1. Generate Static Paths from Keystatic Collection
@@ -18,8 +18,9 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 
-// 2. Fetch Markdoc AST Node
-const articleContent = await article.content();
+// 2. Resolve Markdoc content properly into an array
+const content = await article.content();
+const documentNodes = Array.isArray(content) ? content : content?.children || content?.node || [];
 
 // 3. Metadata, URLs, and JSON-LD Schema Setup
 const siteUrl = Astro.site ? Astro.site.origin : 'https://owaaghedo.com';
@@ -418,7 +419,7 @@ const articleSchema = {
   <main class="article-content-wrapper">
     <article class="article-content">
       <div class="markdoc-body">
-        {articleContent && <DocumentRenderer document={articleContent.node} />}
+        <DocumentRenderer document={documentNodes} />
       </div>
 
       <!-- Required End-of-Article CTAs Box -->
