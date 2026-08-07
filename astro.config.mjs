@@ -20,6 +20,7 @@ export default defineConfig({
       filter: (page) => 
         !page.includes('/keystatic') && 
         !page.includes('/api/') &&
+        !page.includes('/launchpad-template') &&
         !page.includes('/404'),
       changefreq: 'weekly',
       priority: 0.7,
