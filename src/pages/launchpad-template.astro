@@ -292,7 +292,7 @@ body {
 
 </div>
 
-<script>
+<script is:inline>
   function copyUrl(id, btn) {
     const text = document.getElementById(id).textContent.trim();
     navigator.clipboard.writeText(text).then(() => {
