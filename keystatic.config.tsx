@@ -10,7 +10,6 @@ export default config({
   singletons: {
     siteSettings: singleton({
       label: 'Site Settings',
-      // Change path to point to a single file location without trailing slash
       path: 'src/content/siteSettings', 
       format: { data: 'yaml' },
       schema: {
@@ -27,9 +26,18 @@ export default config({
       path: 'src/content/articles/*',
       format: { 
         data: 'yaml',
-        contentField: 'content' },
+        contentField: 'content' 
+      },
       schema: {
         title: fields.slug({ name: { label: 'Title' } }),
+        
+        // 1. ADDED AUTHOR NAME FIELD
+        authorName: fields.text({
+          label: 'Author Name',
+          defaultValue: 'Owa Aghedo',
+          validation: { isRequired: false },
+        }),
+
         category: fields.select({
           label: 'Category',
           options: [
@@ -46,7 +54,18 @@ export default config({
           directory: 'public/images/articles',
           publicPath: '/images/articles/',
         }),
-        content: fields.markdoc({ label: 'Article Body' }),
+
+        // 2. MARKDOC WITH MIN-HEIGHT TO FIX MOBILE TAP / KEYBOARD FOCUS BUG
+        content: fields.markdoc({
+          label: 'Article Body',
+          options: {
+            image: {
+              directory: 'public/images/articles',
+              publicPath: '/images/articles/',
+            },
+          },
+        }),
+
         footerSpacer: fields.text({
           label: 'Built by Emmy STACK01',
           description: 'This field is intentionally unused — keeps the dashboard scroll bug from hiding real fields. So do not input anything here.',
