@@ -28,6 +28,8 @@ const formattedDate = article.pubDate ? new Date(article.pubDate).toLocaleDateSt
   year: 'numeric',
 }) : '';
 
+const authorName = article.authorName || 'Owa Aghedo';
+
 const tweetText = encodeURIComponent(`Just read this piece: "${article.title}" by @KRAghedo! ${canonicalUrl}`);
 
 const articleSchema = {
@@ -39,7 +41,7 @@ const articleSchema = {
   "image": coverImageUrl,
   "author": {
     "@type": "Person",
-    "name": "Owa Aghedo",
+    "name": authorName,
     "url": siteUrl
   }
 };
@@ -269,7 +271,10 @@ const articleSchema = {
     }
 
     /* Target rendered Markdoc tags directly */
-    .markdoc-body { color: var(--ink-soft); }
+    .markdoc-body { 
+      color: var(--ink-soft); 
+      min-height: 250px;
+    }
     .markdoc-body > * + * { margin-top: 1.6em; }
     .markdoc-body h2 {
       font-size: 1.9rem;
@@ -375,8 +380,8 @@ const articleSchema = {
     <div class="article-header-inner">
       <a href="/articles" class="back-link">← Back to all articles</a>
       <div class="article-meta-top">
-        <span class="article-tag">{article.category || 'Web3'}</span>
-        <span class="article-date-read">{formattedDate}</span>
+        <span class="article-tag">{article.category || 'Education & Explainers'}</span>
+        <span class="article-date-read">By {authorName} {formattedDate && `• ${formattedDate}`}</span>
       </div>
       <h1>{article.title}</h1>
       <p class="article-subtitle">{article.excerpt}</p>
@@ -405,7 +410,7 @@ const articleSchema = {
         <h4>Enjoyed this insight?</h4>
         <p>Help spread the word or let's collaborate on your next growth campaign.</p>
         <div class="cta-actions-row">
-          <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="btn btn-x-share" target="_blank" rel="noopener">
+          <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="btn btn-x-share" target="_blank" rel="noopener noreferrer">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
             </svg>
