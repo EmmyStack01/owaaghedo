@@ -11,7 +11,7 @@ export default config({
     siteSettings: singleton({
       label: 'Site Settings',
       path: 'src/content/siteSettings', 
-      format: { data: 'yaml' },
+      format: { data: 'json' },
       schema: {
         email: fields.text({ label: 'Email Address' }),
         twitterUrl: fields.text({ label: 'X / Twitter URL' }),
@@ -25,17 +25,15 @@ export default config({
       slugField: 'title',
       path: 'src/content/articles/*',
       format: { 
-        data: 'yaml',
+        data: 'json',
         contentField: 'content' 
       },
       schema: {
         title: fields.slug({ name: { label: 'Title' } }),
         
-        // 1. ADDED AUTHOR NAME FIELD
         authorName: fields.text({
           label: 'Author Name',
           defaultValue: 'Owa Aghedo',
-          validation: { isRequired: false },
         }),
 
         category: fields.select({
@@ -47,22 +45,33 @@ export default config({
           ],
           defaultValue: 'Education & Explainers',
         }),
-        excerpt: fields.text({ label: 'Excerpt / Summary', multiline: true }),
-        pubDate: fields.date({ label: 'Publication Date' }),
+
+        excerpt: fields.text({ 
+          label: 'Excerpt / Summary', 
+          multiline: true 
+        }),
+
+        pubDate: fields.date({ 
+          label: 'Publication Date',
+          defaultValue: { kind: 'today' },
+        }),
+
         coverImage: fields.image({
           label: 'Cover Image',
           directory: 'public/images/articles',
           publicPath: '/images/articles/',
         }),
 
-        // 2. MARKDOC WITH MIN-HEIGHT TO FIX MOBILE TAP / KEYBOARD FOCUS BUG
-        content: fields.markdoc({
+        // SWITCHED TO NATIVE fields.document() (Fixes mobile touch & keyboard focus bug)
+        content: fields.document({
           label: 'Article Body',
-          options: {
-            image: {
-              directory: 'public/images/articles',
-              publicPath: '/images/articles/',
-            },
+          formatting: true,
+          dividers: true,
+          links: true,
+          tables: true,
+          images: {
+            directory: 'public/images/articles/inline',
+            publicPath: '/images/articles/inline/',
           },
         }),
 
