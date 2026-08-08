@@ -3,6 +3,7 @@ import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import markdoc from '@astrojs/markdoc';
+import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
@@ -15,6 +16,7 @@ export default defineConfig({
   integrations: [
     react(),
     keystatic(),
+    mdx(),
     markdoc(),
     sitemap({
       filter: (page) => 
