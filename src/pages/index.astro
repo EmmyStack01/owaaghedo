@@ -43,12 +43,18 @@ const schemaData = {
       "@id": `${siteUrl}/#website`,
       "url": siteUrl,
       "name": "Owa Aghedo",
-      "publisher": { "@id": `${siteUrl}/#person` }
+      "publisher": { "@id": `${siteUrl}/#person` },
+      "creator": {
+        "@type": "Organization",
+        "name": "Emmy STACK01",
+        "url": "https://emmystack01.com"
+      }
     },
     {
       "@type": "Person",
       "@id": `${siteUrl}/#person`,
       "name": "Owa Aghedo",
+      "gender": "Female",
       "jobTitle": "Web3 Marketer & KOL",
       "url": siteUrl,
       "image": `${siteUrl}/asset/homepage-og-image.jpg`,
@@ -959,7 +965,7 @@ const schemaData = {
   <!-- Background Portrait -->
   <div class="hero-media">
     <div class="hero-image-slot">
-      <img src="/asset/owa-hero-image.png" alt="Portrait of Owa, Web3 storyteller and KOL">
+      <img src="/asset/owa-hero-image.png" alt="Portrait of Owa, Web3 storyteller and KOL" fetchpriority="high" loading="eager" />
     </div>
     <div class="hero-badge fade-in">
       <span class="dot" aria-hidden="true"></span> Available for Projects
