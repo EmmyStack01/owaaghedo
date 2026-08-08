@@ -24,8 +24,8 @@ export default config({
       label: 'Articles',
       slugField: 'title',
       path: 'src/content/articles/*',
+      // Changed to MDX content mode so raw Markdown parses directly
       format: { 
-        data: 'json',
         contentField: 'content' 
       },
       schema: {
@@ -62,26 +62,16 @@ export default config({
           publicPath: '/images/articles/',
         }),
 
-        // SWITCHED TO NATIVE fields.document() (Fixes mobile touch & keyboard focus bug)
-        content: fields.document({
-  
-  label: 'Article Body',
-  formatting: {
-    inlineMarks: true,
-    listTypes: true, // Enables bullet & ordered lists parsing on paste
-    headingLevels: [1, 2, 3, 4, 5, 6], // Enables H1-H6 parsing on paste
-    blockTypes: true, // Enables blockquotes
-    softBreaks: true,
-  },
-  dividers: true,
-  links: true,
-  tables: true,
-  images: {
-    directory: 'public/images/articles/inline',
-    publicPath: '/images/articles/inline/',
-  },
-}),
-
+        // Switched from fields.document to fields.mdx
+        content: fields.mdx({
+          label: 'Article Body',
+          options: {
+            image: {
+              directory: 'public/images/articles/inline',
+              publicPath: '/images/articles/inline/',
+            },
+          },
+        }),
 
         footerSpacer: fields.text({
           label: 'Built by Emmy STACK01',
