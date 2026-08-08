@@ -18,6 +18,38 @@ const articles = rawArticles
 
 // Unique list of categories for filter pills
 const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boolean))];
+
+// Structured Data (JSON-LD)
+const jsonLdData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://owaaghedo.pages.dev/#person",
+      "name": "Owa Aghedo",
+      "gender": "https://schema.org/Female",
+      "jobTitle": "Web3 Storyteller & Key Opinion Leader (KOL)",
+      "url": "https://owaaghedo.pages.dev",
+      "sameAs": [
+        "https://x.com/KRAghedo"
+      ]
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://owaaghedo.pages.dev/articles#webpage",
+      "url": "https://owaaghedo.pages.dev/articles",
+      "name": "Articles | Owa | Web3 Storyteller & KOL",
+      "mainEntity": {
+        "@id": "https://owaaghedo.pages.dev/#person"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "Emmy STACK01",
+        "url": "https://emmystack01.com"
+      }
+    }
+  ]
+};
 ---
 
 <!DOCTYPE html>
@@ -51,6 +83,9 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
   <meta property="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@KRAghedo">
   <meta property="twitter:image" content="https://owaaghedo.pages.dev/asset/articles-page-og-image.jpg">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLdData)} />
 
   <style>
     /* =========================================================
@@ -354,7 +389,7 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
       color: var(--ink-soft);
       opacity: 0.75;
     }
-    .article-card h3 {
+    .article-card h2 {
       font-size: 1.2rem;
       margin-top: 4px;
       font-weight: 600;
@@ -398,7 +433,7 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
       border: 1px dashed var(--line);
       border-radius: var(--radius);
     }
-    .no-articles h3 {
+    .no-articles h2 {
       font-size: 1.5rem;
       color: var(--wine-1);
       margin-bottom: 8px;
@@ -425,7 +460,7 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
 <body>
 
   <!-- PAGE HEADER -->
-  <section class="page-header">
+  <header class="page-header">
     <div class="wrap">
       <div class="back-link-nav">
         <a href="/" class="back-link">← Back to Home</a>
@@ -434,103 +469,108 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
       <h1>Fresh from the Timeline</h1>
       <p>Thoughts, breakdowns, and strategies on Web3 marketing, community building, and scaling crypto projects worldwide.</p>
     </div>
-  </section>
+  </header>
 
-  <!-- ARTICLES CONTROL HUB -->
-  <section class="articles-hub">
-    <div class="wrap hub-container">
-      <div class="hub-row-top">
-        <div class="search-bar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input type="text" id="articleSearch" placeholder="Search articles by topic, keyword..." aria-label="Search articles">
+  <!-- MAIN CONTENT LANDMARK -->
+  <main>
+    <!-- ARTICLES CONTROL HUB -->
+    <section class="articles-hub">
+      <div class="wrap hub-container">
+        <div class="hub-row-top">
+          <div class="search-bar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="articleSearch" placeholder="Search articles by topic, keyword..." aria-label="Search articles">
+          </div>
+
+          <div class="filter-dropdown">
+            <label for="dateFilter">Sort by:</label>
+            <select id="dateFilter" aria-label="Filter by date">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
         </div>
 
-        <div class="filter-dropdown">
-          <label for="dateFilter">Sort by:</label>
-          <select id="dateFilter" aria-label="Filter by date">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Category Pills Slider -->
-      <div class="category-pills" id="categorySlider" role="tablist" aria-label="Article categories">
-        {categories.map((cat, index) => (
-          <button 
-            class={`cat-btn ${index === 0 ? 'active' : ''}`} 
-            data-category={(cat || '').toLowerCase().replace(/\s+/g, '-')}
-          >
-            {cat === 'all' ? 'All Posts' : cat}
-          </button>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- ARTICLES GRID SECTION -->
-  <section class="articles-section" id="articles">
-    <div class="wrap">
-      <div class="articles-grid" id="articlesGrid">
-        {articles.map((article, i) => {
-          const thumbClass = `t${(i % 6) + 1}`;
-          
-          const formattedDate = article.publishedDate ? new Date(article.publishedDate).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-          }) : '';
-
-          const catSlug = (article.category || 'general').toLowerCase().replace(/\s+/g, '-');
-          const tweetText = encodeURIComponent(`Just read this brilliant piece: "${article.title}" by @KRAghedo!`);
-
-          const safeTitle = (article.title || '').toLowerCase();
-          const safeSummary = (article.summary || '').toLowerCase();
-
-          return (
-            <article 
-              class="article-card" 
-              data-category={catSlug} 
-              data-date={article.publishedDate}
-              data-title={safeTitle}
-              data-summary={safeSummary}
+        <!-- Category Pills Slider -->
+        <div class="category-pills" id="categorySlider" role="tablist" aria-label="Article categories">
+          {categories.map((cat, index) => (
+            <button 
+              class={`cat-btn ${index === 0 ? 'active' : ''}`} 
+              role="tab"
+              aria-selected={index === 0 ? "true" : "false"}
+              data-category={(cat || '').toLowerCase().replace(/\s+/g, '-')}
             >
-              <div class={`article-thumb ${thumbClass}`}>
-                {article.coverImage ? (
-                  <img src={article.coverImage} alt={article.title} style="width:100%; height:100%; object-fit:cover;" />
-                ) : (
-                  <span>Article Cover</span>
-                )}
-              </div>
-              <div class="article-body">
-                <div class="article-meta-row">
-                  <span class="article-cat">{article.category}</span>
-                  <span class="article-date">{formattedDate}</span>
-                </div>
-                <h3><a href={`/articles/${article.slug}`}>{article.title}</a></h3>
-                <p>{article.summary}</p>
-                <div class="article-footer-cta">
-                  <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="cta-share" target="_blank" rel="noopener">
-                    Share this on X and tag me →
-                  </a>
-                  <a href="/#contact" class="cta-hire">Want content like this for your project? Hire me →</a>
-                </div>
-              </div>
-            </article>
-          );
-        })}
+              {cat === 'all' ? 'All Posts' : cat}
+            </button>
+          ))}
+        </div>
       </div>
+    </section>
 
-      <!-- Empty State Container -->
-      <div class="no-articles" id="noArticles">
-        <h3>Article doesn't exist</h3>
-        <p>No matching articles were found. Try searching for a different keyword or category.</p>
+    <!-- ARTICLES GRID SECTION -->
+    <section class="articles-section" id="articles">
+      <div class="wrap">
+        <div class="articles-grid" id="articlesGrid">
+          {articles.map((article, i) => {
+            const thumbClass = `t${(i % 6) + 1}`;
+            
+            const formattedDate = article.publishedDate ? new Date(article.publishedDate).toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            }) : '';
+
+            const catSlug = (article.category || 'general').toLowerCase().replace(/\s+/g, '-');
+            const tweetText = encodeURIComponent(`Just read this brilliant piece: "${article.title}" by @KRAghedo!`);
+
+            const safeTitle = (article.title || '').toLowerCase();
+            const safeSummary = (article.summary || '').toLowerCase();
+
+            return (
+              <article 
+                class="article-card" 
+                data-category={catSlug} 
+                data-date={article.publishedDate}
+                data-title={safeTitle}
+                data-summary={safeSummary}
+              >
+                <div class={`article-thumb ${thumbClass}`}>
+                  {article.coverImage ? (
+                    <img src={article.coverImage} alt={article.title} style="width:100%; height:100%; object-fit:cover;" />
+                  ) : (
+                    <span>Article Cover</span>
+                  )}
+                </div>
+                <div class="article-body">
+                  <div class="article-meta-row">
+                    <span class="article-cat">{article.category}</span>
+                    <span class="article-date">{formattedDate}</span>
+                  </div>
+                  <h2><a href={`/articles/${article.slug}`}>{article.title}</a></h2>
+                  <p>{article.summary}</p>
+                  <div class="article-footer-cta">
+                    <a href={`https://x.com/intent/tweet?text=${tweetText}`} class="cta-share" target="_blank" rel="noopener">
+                      Share this on X and tag me →
+                    </a>
+                    <a href="/#contact" class="cta-hire">Want content like this for your project? Hire me →</a>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <!-- Empty State Container -->
+        <div class="no-articles" id="noArticles">
+          <h2>Article doesn't exist</h2>
+          <p>No matching articles were found. Try searching for a different keyword or category.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
   <script>
     // Filter & Search Logic
@@ -586,11 +626,15 @@ const categories = ['all', ...new Set(articles.map((a) => a.category).filter(Boo
       visibleCards.forEach((card) => articlesContainer?.appendChild(card));
     }
 
-    // Event Listeners
+    // Event Listeners with ARIA aria-selected updates
     categoryBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
-        categoryBtns.forEach((b) => b.classList.remove('active'));
+        categoryBtns.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
         btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
         activeCategory = (btn as HTMLElement).dataset.category || 'all';
         filterAndSortArticles();
       });
