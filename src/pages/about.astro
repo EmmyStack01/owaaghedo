@@ -46,6 +46,7 @@ const { email, twitterUrl, facebookUrl } = await getSiteSettings();
         "@type": "Person",
         "@id": "https://owaaghedo.com/#person",
         "name": "Owa Aghedo",
+        "gender": "Female",
         "alternateName": ["Owa", "KRAghedo"],
         "jobTitle": ["Web3 Marketer", "Growth Strategist", "KOL", "Project Manager"],
         "worksFor": {
@@ -65,14 +66,24 @@ const { email, twitterUrl, facebookUrl } = await getSiteSettings();
           "Crypto Community Building",
           "KOL Management",
           "Content Strategy"
-        ]
+        ],
+        "creator": {
+          "@type": "Organization",
+          "name": "Emmy STACK01",
+          "url": "https://emmystack01.com"
+        }
       },
       {
         "@type": "AboutPage",
         "@id": "https://owaaghedo.com/about#webpage",
         "url": "https://owaaghedo.com/about",
         "name": "About Owa | Web3 Storyteller & KOL",
-        "about": { "@id": "https://owaaghedo.com/#person" }
+        "about": { "@id": "https://owaaghedo.com/#person" },
+        "creator": {
+          "@type": "Organization",
+          "name": "Emmy STACK01",
+          "url": "https://emmystack01.com"
+        }
       },
       {
         "@type": "Service",
@@ -141,7 +152,7 @@ const { email, twitterUrl, facebookUrl } = await getSiteSettings();
 
     <div class="bio-hero-media">
       <div class="bio-hero-image-slot">
-        <img src="/asset/owa-hero-image.png" alt="Owa studio portrait">
+        <img src="/asset/owa-hero-image.png" alt="Owa studio portrait" fetchpriority="high" loading="eager">
       </div>
       <div class="hero-badge fade-in">
         <span class="dot" aria-hidden="true"></span> Available for Projects
